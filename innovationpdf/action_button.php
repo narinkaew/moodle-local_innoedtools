@@ -13,6 +13,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Renders a group of report setting form.
  *
  * @package    local_innoedtools
  * @copyright  2016 Narin Kaewchutima

@@ -13,7 +13,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * index file
+ * Index file.
  *
  * @package    local_innoedtools
  * @copyright  2016 Narin Kaewchutima
@@ -38,27 +38,34 @@ if (isguestuser()) {
 $uid = optional_param('uid', null, PARAM_INT);
 $act = optional_param('act', '', PARAM_SAFEDIR);
 
-/* admin, teacher will redirect to user list page */
+// Admin/Teacher will redirect to user list page.
 $systemcontext = context_system::instance();
 if (is_siteadmin() || has_capability('local/innoedtools:viewallinnovationpdf', $systemcontext)) {
+	// No select user, redirect to user list page.
 	if (!isset($uid)) {
 		$returnurl = new moodle_url('/local/innoedtools/innovationpdf/user.php');
 	    redirect($returnurl);
 	} else {
+		// Choose preview.
 		if($act == '1') {
 		    $returnurl = new moodle_url('/local/innoedtools/innovationpdf/export.php?preview=1&uid='.$uid);
 		    redirect($returnurl);
 		} 
+		// Choose print.
 		else if ($act == '2') {
 		    $returnurl = new moodle_url('/local/innoedtools/innovationpdf/export.php?uid='.$uid);
 		    redirect($returnurl);
 		}
 	}
-} else {
+}
+// Student see only their own. 
+else {
+	// Choose preview.
 	if($act == '1') {
 	    $returnurl = new moodle_url('/local/innoedtools/innovationpdf/export.php?preview=1');
 	    redirect($returnurl);
 	} 
+	// Choose print.
 	else if ($act == '2') {
 	    $returnurl = new moodle_url('/local/innoedtools/innovationpdf/export.php');
 	    redirect($returnurl);
@@ -76,7 +83,7 @@ $PAGE->set_heading($SITE->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('headingtext', 'local_innoedtools'));
 
-/*** Display innovation blogs  ***/
+// Display innovation blogs
 $portfoliolisting = new portfolio_listing();
 $portfoliolisting->display_my_entries();
 

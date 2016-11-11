@@ -13,7 +13,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * report by students
+ * Report by students
  *
  * @package    local_innoedtools
  * @copyright  2016 Narin Kaewchutima
@@ -25,12 +25,24 @@ defined('MOODLE_INTERNAL') || die();
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once('report_tag_base.php');
 
+/**
+ * Report by students
+ *
+ * @copyright  2016 Narin Kaewchutima
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class report_tag_by_students extends report_tag_base {
 
+    /**
+     * Constructor
+     */
 	public function __construct() {
         parent::__construct();
 	}
 
+    /**
+     * Logic to generate the report
+     */
     public function generate_report() {
         global $DB, $PAGE, $USER, $OUTPUT;
         
@@ -40,30 +52,33 @@ class report_tag_by_students extends report_tag_base {
         $table->class = '';
         $table->id = '';
 
-        /*** Prepare table result ***/
+        // Prepare table result
         $table->align = $this->generate_column_align();
         $table->size = $this->generate_column_size();
         $table->data = array();
 
-        /*** Prepare sql statement ***/
+        // Prepare sql statement
         $sql = $this->generate_query();
         $rows = $DB->get_records_sql($sql);
 
-        /*** All tags each student ***/
+        // All tags each student
         foreach ($rows as $row) {
-            /*** display data ***/
+            // display data
             $table->data[] = $this->display_row($row);
         }
 
-        /*** Add a totals row. ***/
+        // Add a totals row
         $table->data[] = $this->total_display_row($table->data);
 
-        // Print it.
+        // Print it
         echo html_writer::table($table);
     }
 
+    /**
+     * Generate query for the report
+     */
 	public function generate_query() {
-        /*** Get using tags for all courses ***/
+        // Get using tags for all courses
         $i = 0;
         $sql_inner_tag_in_course = "";
         $sql_inner_course_count = "";
@@ -88,7 +103,7 @@ class report_tag_by_students extends report_tag_base {
             $sql_inner_course_count .= "CASE WHEN User_Items.courseid = $course_id THEN cnt END AS $course_idnumber";
             $sql_inner_course_count_sum .= "COALESCE(SUM($course_idnumber), 0) AS $course_idnumber";
 
-            /*** Not last record ***/
+            // Not last record
             if($i != $this->num_courses) {
                 $sql_inner_tag_in_course .= " UNION ";
                 $sql_inner_course_count .= ",";
@@ -132,6 +147,9 @@ class report_tag_by_students extends report_tag_base {
         return $sql;
 	}
 
+    /**
+     * Generate column name
+     */
 	public function generate_column_name() {
 		$col = array();
 
@@ -144,6 +162,9 @@ class report_tag_by_students extends report_tag_base {
         return $col;
 	}
 
+    /**
+     * Generate column alignment
+     */
 	public function generate_column_align() {
 		$align = array();
 
@@ -156,6 +177,9 @@ class report_tag_by_students extends report_tag_base {
         return $align;
 	}
 
+    /**
+     * Generate column width
+     */
 	public function generate_column_size() {
 		$size = array();
 
@@ -170,6 +194,11 @@ class report_tag_by_students extends report_tag_base {
         return $size;
 	}
 
+    /**
+     * Generate row data
+     *
+     * @param array $row
+     */
 	public function display_row($row) {
 		$data = array();
         $total_row = 0;
@@ -185,6 +214,11 @@ class report_tag_by_students extends report_tag_base {
         return $data;
 	}
 
+    /**
+     * Generate total row data
+     *
+     * @param array $table
+     */
 	public function total_display_row($table) {
 		$sum_data = array();
 		$data = array();
@@ -209,10 +243,16 @@ class report_tag_by_students extends report_tag_base {
 		return $sum_data;
 	}
 
+    /**
+     * Get row possibility for denominator
+     */
     public function get_row_possibility() {
         return $this->num_courses * $this->num_standard_tag;
     }
 
+    /**
+     * Get total row possibility for denominator
+     */
     public function get_total_possibility() {
         return $this->num_courses * $this->num_standard_tag * $this->num_student;
     }

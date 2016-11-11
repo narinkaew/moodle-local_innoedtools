@@ -13,7 +13,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * report overall
+ * Report overall
  *
  * @package    local_innoedtools
  * @copyright  2016 Narin Kaewchutima
@@ -25,14 +25,31 @@ defined('MOODLE_INTERNAL') || die();
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once('report_tag_base.php');
 
+/**
+ * Report overall
+ *
+ * @copyright  2016 Narin Kaewchutima
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class report_tag_by_overall extends report_tag_base {
 
+    /** Print on pdf */
     protected $isPdf = false;
 
+    /**
+     * Constructor
+     *
+     * @param boolean $isViewAll
+     */
 	public function __construct($isViewAll = true) {
         parent::__construct($isViewAll);
 	}
 
+    /**
+     * Logic to generate the report
+     *
+     * @param boolean $isPdf
+     */
     public function generate_report($isPdf = false) {
         global $DB, $PAGE, $USER, $OUTPUT;
 
@@ -55,31 +72,31 @@ class report_tag_by_overall extends report_tag_base {
                 echo $OUTPUT->heading($studentnamelink);
             }
 
-            /*** Prepare table result ***/
+            // Prepare table result
             $table->align = $this->generate_column_align();
             $table->size = $this->generate_column_size();
             $table->data = array();
 
-            /*** Prepare sql statement ***/
+            // Prepare sql statement
             $sql = $this->generate_query($userid);
             $rows = $DB->get_records_sql($sql);
 
-            /*** All tags each student ***/
+            // All tags each student
             if ($this->isPdf) {
                 $table->data[] = $this->display_line_row();
             }
             foreach ($rows as $row) {
-                /*** display data ***/
+                // display data
                 $table->data[] = $this->display_row($row);
             }
 
-            /*** Add a totals row. ***/
+            // Add a totals row
             if ($this->isPdf) {
                 $table->data[] = $this->display_line_row();
             }
             $table->data[] = $this->total_display_row($table->data);
 
-            // Print it.
+            // Print it
             if (!$this->isPdf) {
                 echo html_writer::table($table);
             } else {
@@ -88,12 +105,20 @@ class report_tag_by_overall extends report_tag_base {
         }
     }
 
+    /**
+     * Export the report into pdf
+     */
     public function generate_report_pdf() { 
         return $this->generate_report(true);
     }
 
+    /**
+     * Generate query for the report
+     *
+     * @param boolean $userid Filter this parameter if current user is student capability.
+     */
 	public function generate_query($userid) {
-        /*** Get using tags for all courses ***/
+        // Get using tags for all courses
         $i = 0;
         $sql_inner_tag_in_course = "";
         $sql_inner_course_count = "";
@@ -118,7 +143,7 @@ class report_tag_by_overall extends report_tag_base {
             $sql_inner_course_count .= "CASE WHEN User_Items.id = $course_id THEN cnt END AS $course_idnumber";
             $sql_inner_course_count_sum .= "COALESCE(SUM($course_idnumber), 0) AS $course_idnumber";
 
-            /*** Not last record ***/
+            // Not last record
             if($i != $this->num_courses) {
                 $sql_inner_tag_in_course .= " UNION ";
                 $sql_inner_course_count .= ",";
@@ -150,6 +175,9 @@ class report_tag_by_overall extends report_tag_base {
         return $sql;
 	}
 
+    /**
+     * Generate column name
+     */
 	public function generate_column_name() {
 		$col = array();
 
@@ -162,6 +190,9 @@ class report_tag_by_overall extends report_tag_base {
         return $col;
 	}
 
+    /**
+     * Generate column alignment
+     */
 	public function generate_column_align() {
 		$align = array();
 
@@ -174,6 +205,9 @@ class report_tag_by_overall extends report_tag_base {
         return $align;
 	}
 
+    /**
+     * Generate column width
+     */
 	public function generate_column_size() {
 		$size = array();
 
@@ -187,6 +221,11 @@ class report_tag_by_overall extends report_tag_base {
         return $size;
 	}
 
+    /**
+     * Generate row data
+     *
+     * @param array $row
+     */
 	public function display_row($row) {
 		$data = array();
         $count_this_tag = 0;
@@ -199,7 +238,7 @@ class report_tag_by_overall extends report_tag_base {
             $count_this_tag += $row->$c;
         }
 
-        /*** Progress bar ***/
+        // Progress bar
         if (!$this->isPdf) {
             array_push($data, $this->generate_progress_bar($count_this_tag, $this->get_row_possibility()));
         } else {
@@ -209,6 +248,11 @@ class report_tag_by_overall extends report_tag_base {
         return $data;
 	}
 
+    /**
+     * Generate total row data
+     *
+     * @param array $table
+     */
 	public function total_display_row($table) {
         global $OUTPUT;
 
@@ -225,7 +269,7 @@ class report_tag_by_overall extends report_tag_base {
 			}
 		}
 
-        /*** Aggregate icon ***/
+        // Aggregate icon
         if (!$this->isPdf) {
             array_push($sum_data, $this->aggregate_icon);
         } else {
@@ -237,7 +281,7 @@ class report_tag_by_overall extends report_tag_base {
             $total_count_this_tag += $value;
         }
 
-        /*** Progress bar ***/
+        // Progress bar
         if (!$this->isPdf) {
             array_push($sum_data, $this->generate_progress_bar($total_count_this_tag, $this->get_total_possibility()));
         } else {
@@ -247,14 +291,23 @@ class report_tag_by_overall extends report_tag_base {
 		return $sum_data;
 	}
 
+    /**
+     * Get row possibility for denominator
+     */
     public function get_row_possibility() {
         return $this->num_courses;
     }
 
+    /**
+     * Get total row possibility for denominator
+     */
     public function get_total_possibility() {
         return $this->num_courses * $this->num_standard_tag;
     }
 
+    /**
+     * Display empty row
+     */
     public function display_empty_row() {
         $data = array();
 
@@ -269,6 +322,9 @@ class report_tag_by_overall extends report_tag_base {
         return $data;
     }
 
+    /**
+     * Display row of line
+     */
     public function display_line_row() {
         $data = array();
 

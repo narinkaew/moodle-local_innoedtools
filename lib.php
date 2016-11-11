@@ -24,11 +24,15 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Extends the navigation block and adds a new node 'Inno Ed Tools'. This is visible if the current user has the capability.
+ * @param global_navigation $nav
+ */
 function local_innoedtools_extend_navigation(global_navigation $navigation) {
     global $PAGE, $DB;
 
     if (has_capability('local/innoedtools:canviewtagreport', $PAGE->context) || has_capability('local/innoedtools:canviewinnovationpdf', $PAGE->context)) {
-	    //get the "Site pages" node
+	    // get the "Site pages" node
 	    $nodesitepages = $navigation->children->get('1');
 	    $navigation_label_plugin = get_string('navigation_label_plugin', 'local_innoedtools');
 	    $node_plugin = $nodesitepages->add($navigation_label_plugin, null, null, null, $navigation_label_plugin);
@@ -37,7 +41,7 @@ function local_innoedtools_extend_navigation(global_navigation $navigation) {
 		    
 		  	$node_plugin = $navigation->find($navigation_label_plugin);
 
-		  	//Create a child node
+		  	// Create a child node
 		  	$navigation_label_attributes = get_string('navigation_label_attributes', 'local_innoedtools');
 		  	$url_attributes = new moodle_url('/local/innoedtools/attributes/index.php');
 		    $node_attributes = $node_plugin->add($navigation_label_attributes, $url_attributes, null, null, $navigation_label_attributes);
@@ -47,7 +51,7 @@ function local_innoedtools_extend_navigation(global_navigation $navigation) {
 		
 		  	$node_plugin = $navigation->find($navigation_label_plugin);
 
-		  	//Create a child node
+		  	// Create a child node
 		  	$navigation_label_innovationpdf = get_string('navigation_label_innovationpdf', 'local_innoedtools');
 		  	$url_innovationpdf = new moodle_url('/local/innoedtools/innovationpdf/index.php');
 		    $node_innovationpdf = $node_plugin->add($navigation_label_innovationpdf, $url_innovationpdf, null, null, $navigation_label_innovationpdf);

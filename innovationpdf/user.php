@@ -13,7 +13,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * user list
+ * Display list of user.
  *
  * @package    local_innoedtools
  * @copyright  2016 Narin Kaewchutima
@@ -43,7 +43,7 @@ $PAGE->set_heading($SITE->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('headingtext', 'local_innoedtools'));
 
-/*** Get list of students ***/
+// Get list of students.
 $report_tag_base = new report_tag_base();
 $arr_students = $report_tag_base->get_array_students();
 

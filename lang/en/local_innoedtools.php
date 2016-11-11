@@ -22,11 +22,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/*** Common ***/
+// Common
 $string['pluginname'] = 'Inno Ed Tools';
 $string['navigation_label_plugin'] = 'Inno Ed Tools';
 
-/*** Tag report ***/
+// Tag report
 $string['navigation_label_attributes'] = 'Inno Smart Report';
 
 $string['previewtitle'] = 'Inno Smart Report';
@@ -55,7 +55,7 @@ $string['innoedtools:canviewtagreport'] = 'Can view tag';
 $string['innoedtools:myviewtagreport'] = 'View my tag';
 $string['innoedtools:viewalltagreport'] = 'View all tag';
 
-/*** Innovation PDF ***/
+// Innovation PDF
 $string['navigation_label_innovationpdf'] = 'Inno Smart Portfolio';
 
 $string['titletext'] = 'Inno Smart Portfolio';

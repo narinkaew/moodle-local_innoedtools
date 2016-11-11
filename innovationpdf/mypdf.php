@@ -24,28 +24,37 @@ define('K_TCPDF_CALLS_IN_HTML', true);
 
 require_once($CFG->dirroot.'/lib/pdflib.php');
 
+/**
+ * Extend TCPDF to override header function.
+ * 
+ * @copyright  2016 Narin Kaewchutima
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class mypdf extends TCPDF {
-    //Page header
+
+    /**
+     * Override the full background image on header.
+     */
     public function Header() {
         global $CFG;
 
-        // get the current page break margin
+        // Get the current page break margin.
         $bMargin = $this->getBreakMargin();
 
-        // get current auto-page-break mode
+        // Get current auto-page-break mode.
         $auto_page_break = $this->AutoPageBreak;
 
-        // disable auto-page-break
+        // Disable auto-page-break.
         $this->SetAutoPageBreak(false, 0);
 
-        // set bacground image
+        // Set background image.
         $img_file = $CFG->dirroot.'/local/innoedtools/innovationpdf/image/'.get_string('backgroundimagefile', 'local_innoedtools');
         $this->Image($img_file, 0, 0, 210, 297, '', '', '', false, 300, '', false, false, 0);
 
-        // restore auto-page-break status
+        // Restore auto-page-break status.
         $this->SetAutoPageBreak($auto_page_break, $bMargin);
 
-        // set the starting point for the page content
+        // Set the starting point for the page content.
         $this->setPageMark();
     }
 }

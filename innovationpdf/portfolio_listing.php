@@ -13,7 +13,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * portfolio blog listing
+ * Portfolio blog listing.
  *
  * @package    local_innoedtools
  * @copyright  2016 Narin Kaewchutima
@@ -30,11 +30,23 @@ require_once($CFG->dirroot .'/blog/locallib.php');
 require_once($CFG->dirroot .'/course/lib.php');
 require_once($CFG->dirroot .'/comment/lib.php');
 
+/**
+ * Portfolio blog listing.
+ *
+ * @copyright  2016 Narin Kaewchutima
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class portfolio_listing extends blog_listing {
 
+    /** Current user. */
     protected $current_user = 0;
+
+    /** Number of current user blogs. */
     protected $num_blogs = 0;
 
+    /**
+     * Constructor
+     */
     public function __construct() {
         global $USER;
 
@@ -42,6 +54,9 @@ class portfolio_listing extends blog_listing {
         $this->current_user = isset($uid) ? $uid : $USER->id;
     }
 
+    /**
+     * Render current user blog entries
+     */
     public function display_my_entries() {
     	global $CFG, $DB, $PAGE, $USER, $OUTPUT;
 
@@ -64,7 +79,7 @@ class portfolio_listing extends blog_listing {
 
                 $blogentry = new blog_entry(null, $entry);
 
-                // // Get the required blog entry data to render it.
+                // Get the required blog entry data to render it.
                 $blogentry->prepare_render();
                 echo $output->render($blogentry);
             }
@@ -77,12 +92,12 @@ class portfolio_listing extends blog_listing {
     }
 
     /**
-    *  Copy from default blog page query
-    *    $sqlarray = $this->get_entry_fetch_sql(false, 'userid ASC, courseid ASC');
-    *    $entries = $DB->get_records_sql($sqlarray['sql'], $sqlarray['params'], $start, $limit);
-    *    $totalentries = $this->count_entries();
-    *
-    **/
+     *  Copy from default blog page query
+     *    $sqlarray = $this->get_entry_fetch_sql(false, 'userid ASC, courseid ASC');
+     *    $entries = $DB->get_records_sql($sqlarray['sql'], $sqlarray['params'], $start, $limit);
+     *    $totalentries = $this->count_entries();
+     *
+     */
     protected function get_innovation_blog() {
         global $DB;
 

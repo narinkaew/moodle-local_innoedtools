@@ -13,6 +13,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Export the pdf.
  *
  * @package    local_innoedtools
  * @copyright  2016 Narin Kaewchutima
@@ -30,6 +31,6 @@ if (isguestuser()) {
 $uid = optional_param('uid', null, PARAM_INT);
 $preview = optional_param('preview', null, PARAM_INT);
 
-/*** Display innovation portfolio pdf ***/
+// Display innovation portfolio pdf
 $export_innovation_pdf = new export_innovation_pdf($preview);
 $export_innovation_pdf->print_blog();

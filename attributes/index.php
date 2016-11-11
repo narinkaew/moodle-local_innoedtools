@@ -39,20 +39,20 @@ $systemcontext = context_system::instance();
 $PAGE->set_context($systemcontext);
 $PAGE->set_pagelayout('report');
 
-/* Get URL parameters */
+// Get url parameters.
 $requestedqtype = optional_param('qtype', '', PARAM_SAFEDIR);
 
-/* include css */
+// Include css.
 $PAGE->requires->css('/local/innoedtools/attributes/styles.css');
 
-/*** PAGE TITLE ***/
+// Page title.
 $PAGE->set_title(get_string('previewtitle', 'local_innoedtools'));
 $PAGE->set_heading($SITE->fullname);
 echo $OUTPUT->header();
 
 echo $OUTPUT->heading(get_string('managepageheading', 'local_innoedtools'));
 
-/*** BODY ***/
+// Body.
 $report_tag_base = new report_tag_base();
 if ($report_tag_base->get_num_standard_tag() == 0) {
     echo $OUTPUT->notification(get_string('nostandardtag', 'local_innoedtools'), 'notifymessage');
@@ -61,7 +61,8 @@ else if ($report_tag_base->get_num_courses() == 0) {
     echo $OUTPUT->notification(get_string('nocourses', 'local_innoedtools'), 'notifymessage');
 }
 else {
-    if (is_siteadmin() || has_capability('local/innoedtools:viewalltagreport', $systemcontext)) { // Teachers will see all student reports
+    // Teachers will see all student reports
+    if (is_siteadmin() || has_capability('local/innoedtools:viewalltagreport', $systemcontext)) { 
 
         $qtypechoices = array();
         $qtypechoices['1'] = get_string('typeall', 'local_innoedtools');
@@ -86,24 +87,25 @@ else {
             $title = get_string('reportforattributetype', 'local_innoedtools', $qtypechoices[$requestedqtype]);
             echo $OUTPUT->heading($title);
 
-            /* By Tags - 2 */
+            // By Tags.
             if($requestedqtype == '2') {
                 $report_tag_by_tags = new report_tag_by_tags();
                 $report_tag_by_tags->generate_report();
             }
-            /* By Students - 3 */
+            // By Students.
             else if($requestedqtype == '3') {
                 $report_tag_by_students = new report_tag_by_students();
                 $report_tag_by_students->generate_report();
             }
-            /* Overall - 1 */
+            // Overall.
             else {
                 $report_tag_by_overall = new report_tag_by_overall();
                 $report_tag_by_overall->generate_report();
             }
         }
     }
-    else { //Students will see just their own report
+    // Students will see just their own report.
+    else { 
         $report_tag_by_overall = new report_tag_by_overall(false);
         $report_tag_by_overall->generate_report();
     }
