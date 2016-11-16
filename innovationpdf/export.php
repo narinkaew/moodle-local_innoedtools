@@ -1,4 +1,6 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -31,6 +33,6 @@ if (isguestuser()) {
 $uid = optional_param('uid', null, PARAM_INT);
 $preview = optional_param('preview', null, PARAM_INT);
 
-// Display innovation portfolio pdf
-$export_innovation_pdf = new export_innovation_pdf($preview);
-$export_innovation_pdf->print_blog();
+// Display innovation portfolio pdf.
+$exportinnovationpdf = new export_innovation_pdf($preview);
+$exportinnovationpdf->print_blog();

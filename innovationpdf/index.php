@@ -1,4 +1,6 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -41,35 +43,32 @@ $act = optional_param('act', '', PARAM_SAFEDIR);
 // Admin/Teacher will redirect to user list page.
 $systemcontext = context_system::instance();
 if (is_siteadmin() || has_capability('local/innoedtools:viewallinnovationpdf', $systemcontext)) {
-	// No select user, redirect to user list page.
-	if (!isset($uid)) {
-		$returnurl = new moodle_url('/local/innoedtools/innovationpdf/user.php');
-	    redirect($returnurl);
-	} else {
-		// Choose preview.
-		if($act == '1') {
-		    $returnurl = new moodle_url('/local/innoedtools/innovationpdf/export.php?preview=1&uid='.$uid);
-		    redirect($returnurl);
-		} 
-		// Choose print.
-		else if ($act == '2') {
-		    $returnurl = new moodle_url('/local/innoedtools/innovationpdf/export.php?uid='.$uid);
-		    redirect($returnurl);
-		}
-	}
-}
-// Student see only their own. 
-else {
-	// Choose preview.
-	if($act == '1') {
-	    $returnurl = new moodle_url('/local/innoedtools/innovationpdf/export.php?preview=1');
-	    redirect($returnurl);
-	} 
-	// Choose print.
-	else if ($act == '2') {
-	    $returnurl = new moodle_url('/local/innoedtools/innovationpdf/export.php');
-	    redirect($returnurl);
-	}
+    // No select user, redirect to user list page.
+    if (!isset($uid)) {
+        $returnurl = new moodle_url('/local/innoedtools/innovationpdf/user.php');
+        redirect($returnurl);
+    } else {
+        // Choose preview.
+        if ($act == '1') {
+            $returnurl = new moodle_url('/local/innoedtools/innovationpdf/export.php?preview=1&uid='.$uid);
+            redirect($returnurl);
+        } else if ($act == '2') {
+            // Choose print.
+            $returnurl = new moodle_url('/local/innoedtools/innovationpdf/export.php?uid='.$uid);
+            redirect($returnurl);
+        }
+    }
+} else {
+    // Student see only their own.
+    // Choose preview.
+    if ($act == '1') {
+        $returnurl = new moodle_url('/local/innoedtools/innovationpdf/export.php?preview=1');
+        redirect($returnurl);
+    } else if ($act == '2') {
+        // Choose print.
+        $returnurl = new moodle_url('/local/innoedtools/innovationpdf/export.php');
+        redirect($returnurl);
+    }
 }
 
 comment::init();
@@ -83,7 +82,7 @@ $PAGE->set_heading($SITE->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('headingtext', 'local_innoedtools'));
 
-// Display innovation blogs
+// Display innovation blogs.
 $portfoliolisting = new portfolio_listing();
 $portfoliolisting->display_my_entries();
 

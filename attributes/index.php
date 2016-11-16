@@ -53,16 +53,14 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('managepageheading', 'local_innoedtools'));
 
 // Body.
-$report_tag_base = new report_tag_base();
-if ($report_tag_base->get_num_standard_tag() == 0) {
+$reporttagbase = new report_tag_base();
+if ($reporttagbase->get_num_standard_tag() == 0) {
     echo $OUTPUT->notification(get_string('nostandardtag', 'local_innoedtools'), 'notifymessage');
-}
-else if ($report_tag_base->get_num_courses() == 0) {
+} else if ($reporttagbase->get_num_courses() == 0) {
     echo $OUTPUT->notification(get_string('nocourses', 'local_innoedtools'), 'notifymessage');
-}
-else {
-    // Teachers will see all student reports
-    if (is_siteadmin() || has_capability('local/innoedtools:viewalltagreport', $systemcontext)) { 
+} else {
+    // Teachers will see all student reports.
+    if (is_siteadmin() || has_capability('local/innoedtools:viewalltagreport', $systemcontext)) {
 
         $qtypechoices = array();
         $qtypechoices['1'] = get_string('typeall', 'local_innoedtools');
@@ -87,27 +85,24 @@ else {
             $title = get_string('reportforattributetype', 'local_innoedtools', $qtypechoices[$requestedqtype]);
             echo $OUTPUT->heading($title);
 
-            // By Tags.
-            if($requestedqtype == '2') {
-                $report_tag_by_tags = new report_tag_by_tags();
-                $report_tag_by_tags->generate_report();
-            }
-            // By Students.
-            else if($requestedqtype == '3') {
-                $report_tag_by_students = new report_tag_by_students();
-                $report_tag_by_students->generate_report();
-            }
-            // Overall.
-            else {
-                $report_tag_by_overall = new report_tag_by_overall();
-                $report_tag_by_overall->generate_report();
+            if ($requestedqtype == '2') {
+                // By Tags.
+                $reporttagbytags = new report_tag_by_tags();
+                $reporttagbytags->generate_report();
+            } else if ($requestedqtype == '3') {
+                // By Students.
+                $reporttagbystudents = new report_tag_by_students();
+                $reporttagbystudents->generate_report();
+            } else {
+                // Overall.
+                $reporttagbyoverall = new report_tag_by_overall();
+                $reporttagbyoverall->generate_report();
             }
         }
-    }
-    // Students will see just their own report.
-    else { 
-        $report_tag_by_overall = new report_tag_by_overall(false);
-        $report_tag_by_overall->generate_report();
+    } else {
+        // Students will see just their own report.
+        $reporttagbyoverall = new report_tag_by_overall(false);
+        $reporttagbyoverall->generate_report();
     }
 }
 

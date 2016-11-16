@@ -1,4 +1,6 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -33,27 +35,30 @@ require_once('report_tag_base.php');
  */
 class report_tag_by_overall extends report_tag_base {
 
-    /** Print on pdf */
-    protected $isPdf = false;
+    /** 
+     * Print on pdf
+     * @protected
+     */
+    protected $ispdf = false;
 
     /**
      * Constructor
      *
-     * @param boolean $isViewAll
+     * @param boolean $isviewall
      */
-	public function __construct($isViewAll = true) {
-        parent::__construct($isViewAll);
-	}
+    public function __construct($isviewall = true) {
+        parent::__construct($isviewall);
+    }
 
     /**
      * Logic to generate the report
      *
-     * @param boolean $isPdf
+     * @param boolean $ispdf
      */
-    public function generate_report($isPdf = false) {
+    public function generate_report($ispdf = false) {
         global $DB, $PAGE, $USER, $OUTPUT;
 
-        $this->isPdf = $isPdf;
+        $this->ispdf = $ispdf;
 
         // Initialise the table.
         $table = new html_table();
@@ -61,43 +66,43 @@ class report_tag_by_overall extends report_tag_base {
         $table->class = '';
         $table->id = '';
 
-        if($this->num_student == 0) {
-            if (!$this->isPdf) {
+        if ($this->numstudent == 0) {
+            if (!$this->ispdf) {
                 echo $OUTPUT->notification(get_string('noenrolleduser', 'local_innoedtools'), 'notifymessage');
             }
         }
-        foreach ($this->arr_students as $userid => $fullname) {
-            if (!$this->isPdf) {
+        foreach ($this->arrstudents as $userid => $fullname) {
+            if (!$this->ispdf) {
                 $studentnamelink = html_writer::link(new moodle_url('/user/view.php', array('id' => $userid)), $fullname);
                 echo $OUTPUT->heading($studentnamelink);
             }
 
-            // Prepare table result
+            // Prepare table result.
             $table->align = $this->generate_column_align();
             $table->size = $this->generate_column_size();
             $table->data = array();
 
-            // Prepare sql statement
+            // Prepare sql statement.
             $sql = $this->generate_query($userid);
             $rows = $DB->get_records_sql($sql);
 
-            // All tags each student
-            if ($this->isPdf) {
+            // All tags each student.
+            if ($this->ispdf) {
                 $table->data[] = $this->display_line_row();
             }
             foreach ($rows as $row) {
-                // display data
+                // Display data.
                 $table->data[] = $this->display_row($row);
             }
 
-            // Add a totals row
-            if ($this->isPdf) {
+            // Add a totals row.
+            if ($this->ispdf) {
                 $table->data[] = $this->display_line_row();
             }
             $table->data[] = $this->total_display_row($table->data);
 
-            // Print it
-            if (!$this->isPdf) {
+            // Print it.
+            if (!$this->ispdf) {
                 echo html_writer::table($table);
             } else {
                 return $table;
@@ -108,7 +113,7 @@ class report_tag_by_overall extends report_tag_base {
     /**
      * Export the report into pdf
      */
-    public function generate_report_pdf() { 
+    public function generate_report_pdf() {
         return $this->generate_report(true);
     }
 
@@ -117,192 +122,196 @@ class report_tag_by_overall extends report_tag_base {
      *
      * @param boolean $userid Filter this parameter if current user is student capability.
      */
-	public function generate_query($userid) {
-        // Get using tags for all courses
+    public function generate_query($userid) {
+        // Get using tags for all courses.
         $i = 0;
-        $sql_inner_tag_in_course = "";
-        $sql_inner_course_count = "";
-        $sql_inner_course_count_sum = "";
-        foreach ($this->arr_courses as $course_id => $course_idnumber) {
+        $sqlinnertagincourse = "";
+        $sqlinnercoursecount = "";
+        $sqlinnercoursecountsum = "";
+        foreach ($this->arrcourses as $courseid => $courseidnumber) {
             $i++;
 
-            $sql_inner_tag_in_course .= "   SELECT t.rawname, c.id, COUNT(t.rawname) cnt
-                                            FROM {tag} t
-                                            JOIN {tag_instance} ti ON ti.tagid = t.id
-                                            JOIN {post}  p ON p.id = ti.itemid
-                                            JOIN {blog_association} ba ON ba.blogid = p.id
-                                            JOIN {course} c ON c.id = p.courseid
-                                            WHERE (p.publishstate = 'site' OR p.publishstate='public')
-                                            AND ti.itemtype = 'post'
-                                            AND ti.component = 'core'
-                                            AND p.courseid = $course_id
-                                            AND p.userid = $userid
-                                            GROUP BY t.rawname, c.id
-                                        ";
+            $sqlinnertagincourse .= "SELECT t.rawname,
+                                            c.id,
+                                            COUNT(t.rawname) cnt
+                                        FROM {tag} t
+                                        JOIN {tag_instance} ti ON ti.tagid = t.id
+                                        JOIN {post}  p ON p.id = ti.itemid
+                                        JOIN {blog_association} ba ON ba.blogid = p.id
+                                        JOIN {course} c ON c.id = p.courseid
+                                        WHERE (p.publishstate = 'site' OR p.publishstate='public')
+                                        AND ti.itemtype = 'post'
+                                        AND ti.component = 'core'
+                                        AND p.courseid = $courseid
+                                        AND p.userid = $userid
+                                        GROUP BY t.rawname, c.id
+                                    ";
 
-            $sql_inner_course_count .= "CASE WHEN User_Items.id = $course_id THEN cnt END AS $course_idnumber";
-            $sql_inner_course_count_sum .= "COALESCE(SUM($course_idnumber), 0) AS $course_idnumber";
+            $sqlinnercoursecount .= "CASE WHEN User_Items.id = $courseid THEN cnt END AS $courseidnumber";
+            $sqlinnercoursecountsum .= "COALESCE(SUM($courseidnumber), 0) AS $courseidnumber";
 
-            // Not last record
-            if($i != $this->num_courses) {
-                $sql_inner_tag_in_course .= " UNION ";
-                $sql_inner_course_count .= ",";
-                $sql_inner_course_count_sum .= ",";
+            // Not last record.
+            if ($i != $this->numcourses) {
+                $sqlinnertagincourse .= " UNION ";
+                $sqlinnercoursecount .= ",";
+                $sqlinnercoursecountsum .= ",";
             }
         }
 
-        $sql = "SELECT  rawname,
-                        $sql_inner_course_count_sum
-                FROM
-                (
-                    SELECT  User_Items.rawname,
-                            $sql_inner_course_count
+        $sql = "SELECT rawname,
+                       $sqlinnercoursecountsum
                     FROM
                     (
-                        SELECT t.rawname, b.id, COALESCE(b.cnt, 0) cnt
-                        FROM {tag} t
-                        LEFT JOIN
-                        (
-                            $sql_inner_tag_in_course
-                        ) b
-                        ON t.rawname = b.rawname
-                        WHERE t.isstandard = 1
-                    ) User_Items
-                ) User_Items_Extended
+                        SELECT User_Items.rawname,
+                               $sqlinnercoursecount
+                            FROM
+                            (
+                                SELECT t.rawname,
+                                       b.id,
+                                       COALESCE(b.cnt, 0) cnt
+                                    FROM {tag} t
+                                    LEFT JOIN
+                                    (
+                                        $sqlinnertagincourse
+                                    ) b
+                                    ON t.rawname = b.rawname
+                                    WHERE t.isstandard = 1
+                            ) User_Items
+                    ) User_Items_Extended
                 GROUP BY rawname
-            ";
+                ";
 
         return $sql;
-	}
+    }
 
     /**
      * Generate column name
      */
-	public function generate_column_name() {
-		$col = array();
+    public function generate_column_name() {
+        $col = array();
 
         array_push($col, get_string('attributename', 'local_innoedtools'));
-        foreach ($this->arr_courses as $course_id => $course_idnumber) {
-            array_push($col, $course_idnumber);
+        foreach ($this->arrcourses as $courseid => $courseidnumber) {
+            array_push($col, $courseidnumber);
         }
         array_push($col, get_string('overall', 'local_innoedtools'));
 
         return $col;
-	}
+    }
 
     /**
      * Generate column alignment
      */
-	public function generate_column_align() {
-		$align = array();
+    public function generate_column_align() {
+        $align = array();
 
         array_push($align, 'left');
-        for ($i=0; $i < $this->num_courses; $i++) { 
-            array_push($align, 'center'); 
+        for ($i = 0; $i < $this->numcourses; $i++) {
+            array_push($align, 'center');
         }
-        array_push($align, 'center'); 
+        array_push($align, 'center');
 
         return $align;
-	}
+    }
 
     /**
      * Generate column width
      */
-	public function generate_column_size() {
-		$size = array();
+    public function generate_column_size() {
+        $size = array();
 
         array_push($size, '35%');
-        $colSize = $this->convert_to_percent((50/100), $this->num_courses);
-        for ($i=0; $i < $this->num_courses; $i++) { 
-            array_push($size, $colSize); 
+        $colsize = $this->convert_to_percent((50 / 100), $this->numcourses);
+        for ($i = 0; $i < $this->numcourses; $i++) {
+            array_push($size, $colsize);
         }
         array_push($size, '15%');
 
         return $size;
-	}
+    }
 
     /**
      * Generate row data
      *
      * @param array $row
      */
-	public function display_row($row) {
-		$data = array();
-        $count_this_tag = 0;
+    public function display_row($row) {
+        $data = array();
+        $countthistag = 0;
 
-		array_push($data, $row->rawname);
+        array_push($data, $row->rawname);
 
-        foreach ($this->arr_courses as $course_id => $course_idnumber) {
-        	$c = strtolower($course_idnumber);
-            array_push($data, $row->$c); 
-            $count_this_tag += $row->$c;
+        foreach ($this->arrcourses as $courseid => $courseidnumber) {
+            $c = strtolower($courseidnumber);
+            array_push($data, $row->$c);
+            $countthistag += $row->$c;
         }
 
-        // Progress bar
-        if (!$this->isPdf) {
-            array_push($data, $this->generate_progress_bar($count_this_tag, $this->get_row_possibility()));
+        // Progress bar.
+        if (!$this->ispdf) {
+            array_push($data, $this->generate_progress_bar($countthistag, $this->get_row_possibility()));
         } else {
-            array_push($data, $this->convert_to_percent($count_this_tag, $this->get_row_possibility()));
+            array_push($data, $this->convert_to_percent($countthistag, $this->get_row_possibility()));
         }
 
         return $data;
-	}
+    }
 
     /**
      * Generate total row data
      *
      * @param array $table
      */
-	public function total_display_row($table) {
+    public function total_display_row($table) {
         global $OUTPUT;
 
-		$sum_data = array();
-		$data = array();
-        $total_count_this_tag = 0;
+        $sumdata = array();
+        $data = array();
+        $totalcountthistag = 0;
 
-		// total count, exclude for first & last columns
-		foreach ($table as $key => $value) {
-			foreach ($value as $key2 => $value2) {
-				if($key2 != 0 && $key2 != count($value)-1) {
-					$data[$key2] = $data[$key2] + $value2;
-				}
-			}
-		}
+        // Total count, exclude for first & last columns.
+        foreach ($table as $key => $value) {
+            foreach ($value as $key2 => $value2) {
+                if ($key2 != 0 && $key2 != count($value) - 1) {
+                    $data[$key2] = $data[$key2] + $value2;
+                }
+            }
+        }
 
-        // Aggregate icon
-        if (!$this->isPdf) {
-            array_push($sum_data, $this->aggregate_icon);
+        // Aggregate icon.
+        if (!$this->ispdf) {
+            array_push($sumdata, $this->aggregateicon);
         } else {
-            array_push($sum_data, '<dd><b>'.get_string('total', 'local_innoedtools').'</b></dd>');
+            array_push($sumdata, '<dd><b>'.get_string('total', 'local_innoedtools').'</b></dd>');
         }
 
         foreach ($data as $key => $value) {
-            array_push($sum_data, '<b>'.$value.'</b>');
-            $total_count_this_tag += $value;
+            array_push($sumdata, '<b>'.$value.'</b>');
+            $totalcountthistag += $value;
         }
 
-        // Progress bar
-        if (!$this->isPdf) {
-            array_push($sum_data, $this->generate_progress_bar($total_count_this_tag, $this->get_total_possibility()));
+        // Progress bar.
+        if (!$this->ispdf) {
+            array_push($sumdata, $this->generate_progress_bar($totalcountthistag, $this->get_total_possibility()));
         } else {
-            array_push($sum_data, $this->convert_to_percent($total_count_this_tag, $this->get_total_possibility()));
+            array_push($sumdata, $this->convert_to_percent($totalcountthistag, $this->get_total_possibility()));
         }
 
-		return $sum_data;
-	}
+        return $sumdata;
+    }
 
     /**
      * Get row possibility for denominator
      */
     public function get_row_possibility() {
-        return $this->num_courses;
+        return $this->numcourses;
     }
 
     /**
      * Get total row possibility for denominator
      */
     public function get_total_possibility() {
-        return $this->num_courses * $this->num_standard_tag;
+        return $this->numcourses * $this->numstandardtag;
     }
 
     /**
@@ -313,7 +322,7 @@ class report_tag_by_overall extends report_tag_base {
 
         array_push($data, null);
 
-        for ($i=0; $i < $this->num_courses; $i++) { 
+        for ($i = 0; $i < $this->numcourses; $i++) {
             array_push($data, null);
         }
 
@@ -331,7 +340,7 @@ class report_tag_by_overall extends report_tag_base {
         $line = '<hr />';
         array_push($data, $line);
 
-        for ($i=0; $i < $this->num_courses; $i++) { 
+        for ($i = 0; $i < $this->numcourses; $i++) {
             array_push($data, $line);
         }
 

@@ -26,35 +26,38 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Extends the navigation block and adds a new node 'Inno Ed Tools'. This is visible if the current user has the capability.
- * @param global_navigation $nav
+ * @param global_navigation $navigation
  */
 function local_innoedtools_extend_navigation(global_navigation $navigation) {
     global $PAGE, $DB;
 
-    if (has_capability('local/innoedtools:canviewtagreport', $PAGE->context) || has_capability('local/innoedtools:canviewinnovationpdf', $PAGE->context)) {
-	    // get the "Site pages" node
-	    $nodesitepages = $navigation->children->get('1');
-	    $navigation_label_plugin = get_string('navigation_label_plugin', 'local_innoedtools');
-	    $node_plugin = $nodesitepages->add($navigation_label_plugin, null, null, null, $navigation_label_plugin);
+    if (has_capability('local/innoedtools:canviewtagreport', $PAGE->context) ||
+        has_capability('local/innoedtools:canviewinnovationpdf', $PAGE->context)) {
+        // Get the "Site pages" node.
+        $nodesitepages = $navigation->children->get('1');
+        $navigationlabelplugin = get_string('navigation_label_plugin', 'local_innoedtools');
+        $nodeplugin = $nodesitepages->add($navigationlabelplugin, null, null, null, $navigationlabelplugin);
 
-	    if (has_capability('local/innoedtools:canviewtagreport', $PAGE->context)) {
-		    
-		  	$node_plugin = $navigation->find($navigation_label_plugin);
+        if (has_capability('local/innoedtools:canviewtagreport', $PAGE->context)) {
 
-		  	// Create a child node
-		  	$navigation_label_attributes = get_string('navigation_label_attributes', 'local_innoedtools');
-		  	$url_attributes = new moodle_url('/local/innoedtools/attributes/index.php');
-		    $node_attributes = $node_plugin->add($navigation_label_attributes, $url_attributes, null, null, $navigation_label_attributes);
-		}
+            $nodeplugin = $navigation->find($navigationlabelplugin);
 
-	    if (has_capability('local/innoedtools:canviewinnovationpdf', $PAGE->context)) {
-		
-		  	$node_plugin = $navigation->find($navigation_label_plugin);
+            // Create a child node.
+            $navigationlabelattributes = get_string('navigation_label_attributes', 'local_innoedtools');
+            $urlattributes = new moodle_url('/local/innoedtools/attributes/index.php');
+            $nodeattributes = $nodeplugin->add($navigationlabelattributes, $urlattributes, null, null,
+                                                    $navigationlabelattributes);
+        }
 
-		  	// Create a child node
-		  	$navigation_label_innovationpdf = get_string('navigation_label_innovationpdf', 'local_innoedtools');
-		  	$url_innovationpdf = new moodle_url('/local/innoedtools/innovationpdf/index.php');
-		    $node_innovationpdf = $node_plugin->add($navigation_label_innovationpdf, $url_innovationpdf, null, null, $navigation_label_innovationpdf);
-		}
-	}
+        if (has_capability('local/innoedtools:canviewinnovationpdf', $PAGE->context)) {
+
+            $nodeplugin = $navigation->find($navigationlabelplugin);
+
+            // Create a child node.
+            $navigationlabelinnovationpdf = get_string('navigation_label_innovationpdf', 'local_innoedtools');
+            $urlinnovationpdf = new moodle_url('/local/innoedtools/innovationpdf/index.php');
+            $nodeinnovationpdf = $nodeplugin->add($navigationlabelinnovationpdf, $urlinnovationpdf, null, null,
+                                                    $navigationlabelinnovationpdf);
+        }
+    }
 }

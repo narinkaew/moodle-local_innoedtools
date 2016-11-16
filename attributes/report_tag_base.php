@@ -34,39 +34,72 @@ require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
  */
 class report_tag_base {
 
-    /** Number of course. */
-    protected $num_courses = 0;
-    /** Number of standard tag. */
-    protected $num_standard_tag = 0;
-    /** Number of student. */
-	protected $num_student = 0;
+    /**
+     * Number of course.
+     * @protected
+     */
+    protected $numcourses = 0;
 
-    /** Array of course. */
-    protected $arr_courses = array();
-    /** Array of course context. */
-    protected $arr_courses_context = array();
-    /** Array of student. */
-    protected $arr_students = array();
-    /** Array of blog. */
-    protected $arr_blogs = array();
+    /**
+     * Number of standard tag.
+     * @protected
+     */
+    protected $numstandardtag = 0;
 
-    /** Get a course context. */
-    protected $context_course_id = 0;
-    /** Aggregate icon in html. */
-    protected $aggregate_icon = null;
+    /**
+     * Number of student.
+     * @protected
+     */
+    protected $numstudent = 0;
+
+    /**
+     * Array of course.
+     * @protected
+     */
+    protected $arrcourses = array();
+
+    /**
+     * Array of course context.
+     * @protected
+     */
+    protected $arrcoursescontext = array();
+
+    /**
+     * Array of student.
+     * @protected
+     */
+    protected $arrstudents = array();
+
+    /**
+     * Array of blog.
+     * @protected
+     */
+    protected $arrblogs = array();
+
+    /**
+     * Get a course context.
+     * @protected
+     */
+    protected $contextcourseid = 0;
+
+    /**
+     * Aggregate icon in html.
+     * @protected
+     */
+    protected $aggregateicon = null;
 
     /**
      * Constructor
      *
-     * @param boolean $isViewAll
+     * @param boolean $isviewall
      */
-	public function __construct($isViewAll = true) {
+    public function __construct($isviewall = true) {
         $this->initial_course();
         $this->initial_standard_tag();
         $this->initial_context_course_id();
-        $this->initial_student($isViewAll); // Must be after context course id.
+        $this->initial_student($isviewall); // Must be after context course id.
         $this->initial_aggregate_icon();
-	}
+    }
 
     /**
      * Initial course data
@@ -74,18 +107,22 @@ class report_tag_base {
     protected function initial_course() {
         global $DB;
 
-        $sql_course_list = "    SELECT id, sortorder, fullname, shortname, idnumber
-                                FROM {course} 
-                                WHERE idnumber <> ''
-                                AND visible = 1
-                                ORDER BY sortorder
-                            ";
-        $rows_courses = $DB->get_records_sql($sql_course_list);
-        $this->num_courses = count($rows_courses);
+        $sqlcourselist = "SELECT id,
+                                 sortorder,
+                                 fullname,
+                                 shortname,
+                                 idnumber
+                            FROM {course}
+                            WHERE idnumber <> ''
+                            AND visible = 1
+                            ORDER BY sortorder
+                        ";
+        $rowscourses = $DB->get_records_sql($sqlcourselist);
+        $this->numcourses = count($rowscourses);
 
-        foreach ($rows_courses as $rows_course) {
-            $this->arr_courses[$rows_course->id] = $rows_course->idnumber;
-            $this->arr_courses_context[$rows_course->id] = context_course::instance($rows_course->id)->id;
+        foreach ($rowscourses as $rowscourse) {
+            $this->arrcourses[$rowscourse->id] = $rowscourse->idnumber;
+            $this->arrcoursescontext[$rowscourse->id] = context_course::instance($rowscourse->id)->id;
         }
     }
 
@@ -95,20 +132,20 @@ class report_tag_base {
     protected function initial_standard_tag() {
         global $DB;
 
-        $sql_standard_tags = "  SELECT COUNT(id) 
-                                FROM {tag} 
-                                WHERE isstandard = 1
+        $sqlstandardtags = "SELECT COUNT(id)
+                            FROM {tag}
+                            WHERE isstandard = 1
                             ";
-        $this->num_standard_tag = $DB->count_records_sql($sql_standard_tags);
+        $this->numstandardtag = $DB->count_records_sql($sqlstandardtags);
     }
 
     /**
      * Initial context course id data
      */
     protected function initial_context_course_id() {
-        foreach ($this->arr_courses_context as $key => $value) {
+        foreach ($this->arrcoursescontext as $key => $value) {
             // Assign just 1 of course context.
-            $this->context_course_id = $value;
+            $this->contextcourseid = $value;
             break;
         }
     }
@@ -116,48 +153,49 @@ class report_tag_base {
     /**
      * Initial student data
      *
-     * @param boolean $isViewAll
+     * @param boolean $isviewall
      */
-    protected function initial_student($isViewAll = true) {
+    protected function initial_student($isviewall = true) {
         global $DB;
 
-        $sql_students_list = $this->generate_query_enrolled_student($isViewAll);
-        $rows_students = $DB->get_records_sql($sql_students_list);
-        $this->num_student = count($rows_students);
+        $sqlstudentslist = $this->generate_query_enrolled_student($isviewall);
+        $rowsstudents = $DB->get_records_sql($sqlstudentslist);
+        $this->numstudent = count($rowsstudents);
 
-        foreach ($rows_students as $rows_student) {
-            $this->arr_students[$rows_student->userid] = $rows_student->fullname;
+        foreach ($rowsstudents as $rowsstudent) {
+            $this->arrstudents[$rowsstudent->userid] = $rowsstudent->fullname;
         }
     }
 
     /**
      * Get all enrolled student
      *
-     * @param boolean $isViewAll
+     * @param boolean $isviewall
      */
-    protected function generate_query_enrolled_student($isViewAll = true) {
+    protected function generate_query_enrolled_student($isviewall = true) {
         global $DB, $USER, $OUTPUT;
 
-        $context_course_id = $this->context_course_id;
+        $contextcourseid = $this->contextcourseid;
 
-        if (!$isViewAll) {
+        if (!$isviewall) {
             $uid = optional_param('uid', null, PARAM_INT);
-            $current_user = isset($uid) ? $uid : $USER->id;
-            $filter_current_user = ' AND u.id = ' . $current_user;
+            $currentuser = isset($uid) ? $uid : $USER->id;
+            $filtercurrentuser = ' AND u.id = ' . $currentuser;
         }
 
-        $sql_students_list = "  SELECT u.id userid, CONCAT(u.firstname, ' ', u.lastname) fullname
-                                FROM {role_assignments} ra
-                                INNER JOIN {role} r ON r.id = ra.roleid
-                                INNER JOIN {user} u ON u.id = ra.userid
-                                WHERE ra.contextid = $context_course_id
+        $sqlstudentslist = "SELECT u.id userid,
+                                   CONCAT(u.firstname, ' ', u.lastname) fullname
+                            FROM {role_assignments} ra
+                            INNER JOIN {role} r ON r.id = ra.roleid
+                            INNER JOIN {user} u ON u.id = ra.userid
+                            WHERE ra.contextid = $contextcourseid
                                 AND archetype = 'student'
                                 AND u.deleted = 0
-                                $filter_current_user
-                                ORDER BY u.firstname, u.lastname, u.email
+                                $filtercurrentuser
+                            ORDER BY u.firstname, u.lastname, u.email
                             ";
 
-        return $sql_students_list;
+        return $sqlstudentslist;
     }
 
     /**
@@ -174,45 +212,48 @@ class report_tag_base {
         $icon->component = 'moodle';
         $icon->title = 'Sum';
         $icon->pix = 'i/agg_sum';
-        $this->aggregate_icon = '<dd>'.$OUTPUT->pix_icon($icon->pix, $icon->title, $icon->component, $icon->attributes).'<b>'.get_string('total').'</b></dd>';
+        $this->aggregateicon = '<dd>'.
+                                   $OUTPUT->pix_icon($icon->pix, $icon->title, $icon->component, $icon->attributes).
+                                   '<b>'.get_string('total').'</b>'.
+                               '</dd>';
     }
 
     /**
      * Get number of course
      */
     public function get_num_courses() {
-        return $this->num_courses;
+        return $this->numcourses;
     }
 
     /**
      * Get number of standard tag
      */
     public function get_num_standard_tag() {
-        return $this->num_standard_tag;
+        return $this->numstandardtag;
     }
 
     /**
      * Get number of student
      */
     public function get_num_student() {
-        return $this->num_student;
+        return $this->numstudent;
     }
 
     /**
      * Get array of student
      */
     public function get_array_students() {
-        return $this->arr_students;
+        return $this->arrstudents;
     }
 
     /**
      * Render progress bar
      *
      * @param int $x Numerator
-     * @param int $y Denominator 
+     * @param int $y Denominator
      */
-	protected function generate_progress_bar($x, $y) {
-		$percent = $this->convert_to_percent($x, $y);
+    protected function generate_progress_bar($x, $y) {
+        $percent = $this->convert_to_percent($x, $y);
 
         $html = '';
         $html .= html_writer::start_tag('div', array('class' => 'block_xp-level-progress'));
@@ -221,13 +262,13 @@ class report_tag_base {
         $html .= html_writer::end_tag('div');
 
         return $html;
-	}
+    }
 
     /**
      * Convert number to percent
      *
      * @param int $x Numerator
-     * @param int $y Denominator 
+     * @param int $y Denominator
      */
     protected function convert_to_percent($x, $y) {
         return round(($x / $y) * 100, 2) . '%';

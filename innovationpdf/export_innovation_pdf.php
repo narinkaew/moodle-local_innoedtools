@@ -1,4 +1,6 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -13,6 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Export pdf class
  *
  * @package    local_innoedtools
  * @copyright  2016 Narin Kaewchutima
@@ -22,90 +25,165 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
-require_once($CFG->dirroot.'/blog/locallib.php'); //file_rewrite_pluginfile_urls
+require_once($CFG->dirroot.'/blog/locallib.php');
 require_once('mypdf.php');
 require_once($CFG->dirroot.'/local/innoedtools/attributes/report_tag_by_overall.php');
 
 /**
  * Business logic of export pdf.
- * 
+ *
  * @copyright  2016 Narin Kaewchutima
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class export_innovation_pdf {
 
-    /** Pdf object. */
+    /**
+     * Pdf object.
+     * @protected
+     */
     protected $pdf = null;
-    /** Preview mode. */
-    protected $is_preview = 0;
-    /** Current user id. */
-    protected $current_user = 0;
-    /** Object of Current user. */
-    protected $user_obj;
+    /**
+     * Preview mode.
+     * @protected
+     */
+    protected $ispreview = 0;
 
-    /** Left margin. */
+    /**
+     * Current user id.
+     * @protected
+     */
+    protected $currentuser = 0;
+    /**
+     * Object of Current user.
+     * @protected
+     */
+    protected $userobj;
+
+    /**
+     * Left margin.
+     * @protected
+     */
     protected $leftmargin = 0;
-    /** Top margin. */
+    /**
+     * Top margin.
+     * @protected
+     */
     protected $topmargin = 0;
-    /** Right margin. */
+    /**
+     * Right margin.
+     * @protected
+     */
     protected $rightmargin = 0;
-    /** Bottom margin. */
+    /**
+     * Bottom margin.
+     * @protected
+     */
     protected $bottommargin = 0;
-    /** Line height. */
+    /**
+     * Line height.
+     * @protected
+     */
     protected $linesize = 0;
-    /** Top margin to first line of body. */
+    /**
+     * Top margin to first line of body.
+     * @protected
+     */
     protected $bodymargin = 0;
 
-    /** Paper A4 width. */
-    protected $A4_width = 0;
-    /** Paper A4 height. */
-    protected $A4_height = 0;
-    /** Body width in protrait. */
-    protected $bodywidth_portrait = 0;
-    /** Body width in landscape. */
-    protected $bodywidth_landscape = 0;
-    /** Body height in protrait. */
-    protected $bodyheight_portrait = 0;
-    /** Body height in landscape. */
-    protected $bodyheight_landscape = 0;
+    /**
+     * Paper A4 width.
+     * @protected
+     */
+    protected $a4width = 0;
+    /**
+     * Paper A4 height.
+     * @protected
+     */
+    protected $a4height = 0;
+    /**
+     * Body width in protrait.
+     * @protected
+     */
+    protected $bodywidthportrait = 0;
+    /**
+     * Body width in landscape.
+     * @protected
+     */
+    protected $bodywidthlandscape = 0;
+    /**
+     * Body height in protrait.
+     * @protected
+     */
+    protected $bodyheightportrait = 0;
+    /**
+     * Body height in landscape.
+     * @protected
+     */
+    protected $bodyheightlandscape = 0;
 
-    /** Cover page title font size. */
+    /**
+     * Cover page title font size. 
+     * @protected
+     */
     protected $covertitlesize = 0;
-    /** Cover page description font size. */
+    /**
+     * Cover page description font size.
+     * @protected
+     */
     protected $coverdescriptionsize = 0;
-    /** Page title font size. */
+    /**
+     * Page title font size.
+     * @protected
+     */
     protected $pagetitlesize = 0;
-    /** Page description font size. */
+    /**
+     * Page description font size.
+     * @protected
+     */
     protected $pagedescriptionsize = 0;
-    /** Default font size. */
+    /**
+     * Default font size.
+     * @protected
+     */
     protected $defaultsize = 0;
 
-    /** Cover background image file. */
+    /**
+     * Cover background image file.
+     * @protected
+     */
     protected $coverimagefile = '';
-    /** Page background image file. */
+    /**
+     * Page background image file.
+     * @protected
+     */
     protected $backgroundimagefile = '';
 
-    /** QR code settings. */
-    protected $style_qrcode = array();
+    /**
+     * QR code settings.
+     * @protected
+     */
+    protected $styleqrcode = array();
 
     /**
      * Constructor
+     *
+     * @param boolean $preview
      */
     public function __construct($preview = 0) {
-        $this->is_preview = $preview;
-        $this->initial_current_user();
+        $this->ispreview = $preview;
+        $this->initial_currentuser();
         $this->initial_variable();
     }
 
     /**
      * Initial current user
      */
-    protected function initial_current_user() {
+    protected function initial_currentuser() {
         global $USER, $DB;
 
         $uid = optional_param('uid', null, PARAM_INT);
-        $this->current_user = isset($uid) ? $uid : $USER->id;
-        $this->user_obj = $DB->get_record('user', array('id' => $this->current_user));
+        $this->currentuser = isset($uid) ? $uid : $USER->id;
+        $this->userobj = $DB->get_record('user', array('id' => $this->currentuser));
     }
 
     /**
@@ -135,13 +213,13 @@ class export_innovation_pdf {
      * Initial value of page size
      */
     protected function initial_variable_page_size() {
-        $this->A4_width = 210;
-        $this->A4_height = 297;
+        $this->a4width = 210;
+        $this->a4height = 297;
 
-        $this->bodywidth_portrait = $this->A4_width - $this->leftmargin - $this->rightmargin;
-        $this->bodywidth_landscape = $this->A4_height - $this->leftmargin - $this->rightmargin;
-        $this->bodyheight_portrait = $this->A4_height - $this->bodymargin - $this->bottommargin;
-        $this->bodyheight_landscape = $this->A4_width - $this->bodymargin - $this->bottommargin;
+        $this->bodywidthportrait = $this->a4width - $this->leftmargin - $this->rightmargin;
+        $this->bodywidthlandscape = $this->a4height - $this->leftmargin - $this->rightmargin;
+        $this->bodyheightportrait = $this->a4height - $this->bodymargin - $this->bottommargin;
+        $this->bodyheightlandscape = $this->a4width - $this->bodymargin - $this->bottommargin;
     }
 
     /**
@@ -161,23 +239,24 @@ class export_innovation_pdf {
     protected function initial_variable_background_image() {
         global $CFG;
 
-        $this->coverimagefile = $CFG->dirroot.'/local/innoedtools/innovationpdf/image/'.get_string('coverbackgroundimagefile', 'local_innoedtools');
-        $this->backgroundimagefile = $CFG->dirroot.'/local/innoedtools/innovationpdf/image/'.get_string('backgroundimagefile', 'local_innoedtools');
+        $imagefolder = $CFG->dirroot.'/local/innoedtools/innovationpdf/image/';
+        $this->coverimagefile = $imagefolder.get_string('coverbackgroundimagefile', 'local_innoedtools');
+        $this->backgroundimagefile = $imagefolder.get_string('backgroundimagefile', 'local_innoedtools');
     }
 
     /**
      * Initial value of qr code settings
      */
     protected function initial_variable_qr_code() {
-        $this->style_qrcode = array(
+        $this->styleqrcode = array(
             'border' => 2,
-            'vpadding' => 'auto', 
-            'hpadding' => 'auto', 
-            'fgcolor' => array(0,0,0),
-            'bgcolor' => false, 
-            'module_width' => 1, 
-            'module_height' => 1 
-        ); 
+            'vpadding' => 'auto',
+            'hpadding' => 'auto',
+            'fgcolor' => array(0, 0, 0),
+            'bgcolor' => false,
+            'module_width' => 1,
+            'module_height' => 1
+        );
     }
 
     /**
@@ -186,41 +265,41 @@ class export_innovation_pdf {
     public function print_blog() {
         global $CFG, $USER, $DB, $OUTPUT, $PAGE, $SITE;
 
-        $rows_blogs = $this->get_innovation_blog();
-        
+        $rowsblogs = $this->get_innovation_blog();
+
         $systemcontext = context_system::instance();
-        // Check if user try to view blog of someone else
+        // Check if user try to view blog of someone else.
         if (!(is_siteadmin() || has_capability('local/innoedtools:viewallinnovationpdf', $systemcontext))) {
-            if ($this->current_user != $USER->id) {
-                $returnurl = new moodle_url('/local/innoedtools/innovationpdf/index.php?uid='.$this->current_user);
+            if ($this->currentuser != $USER->id) {
+                $returnurl = new moodle_url('/local/innoedtools/innovationpdf/index.php?uid='.$this->currentuser);
                 redirect($returnurl);
             }
         }
 
-        if(count($rows_blogs) == 0) {
-            $returnurl = new moodle_url('/local/innoedtools/innovationpdf/index.php?uid='.$this->current_user);
+        if (count($rowsblogs) == 0) {
+            $returnurl = new moodle_url('/local/innoedtools/innovationpdf/index.php?uid='.$this->currentuser);
             redirect($returnurl);
         } else {
-            // PDF
+            // Pdf.
             $this->create_pdf_object();
 
-            // Cover page
+            // Cover page.
             $this->generate_cover_page();
-            foreach ($rows_blogs as $entry) {
+            foreach ($rowsblogs as $entry) {
 
-                // Content
+                // Content.
                 $this->generate_content_page($entry);
             }
 
-            // Last page
+            // Last page.
             $this->generate_last_page();
         }
 
-        // Filename
-        $filename = $this->user_obj->username.'_portfolio';
+        // Filename.
+        $filename = $this->userobj->username.'_portfolio';
         $downloadfilename = clean_filename($filename.".pdf");
 
-        if($this->is_preview == '1') {
+        if ($this->ispreview == '1') {
             $this->pdf->Output($downloadfilename);
         } else {
             $this->pdf->Output($downloadfilename, 'D');
@@ -235,30 +314,29 @@ class export_innovation_pdf {
     protected function get_innovation_blog() {
         global $DB;
 
-        $sql_blog_list = "  SELECT p.id, p.userid, p.courseid, p.subject, p.summary
-                            FROM {post} p
-                            INNER JOIN {course} c
-                            ON p.courseid = c.id
-                            WHERE p.courseid <> 0
-                            AND p.module = 'blog'
-                            AND c.idnumber <> ''
-                            AND c.visible = 1
-                            AND p.userid = $this->current_user
-                            ORDER BY courseid ASC 
+        $sqlbloglist = "SELECT p.id, p.userid, p.courseid, p.subject, p.summary
+                        FROM {post} p
+                        INNER JOIN {course} c ON p.courseid = c.id
+                        WHERE p.courseid <> 0
+                        AND p.module = 'blog'
+                        AND c.idnumber <> ''
+                        AND c.visible = 1
+                        AND p.userid = $this->currentuser
+                        ORDER BY courseid ASC 
                         ";
-        $rows_blogs = $DB->get_records_sql($sql_blog_list);
+        $rowsblogs = $DB->get_records_sql($sqlbloglist);
 
-        return $rows_blogs;
+        return $rowsblogs;
     }
 
     /**
      * Create pdf object
      */
     protected function create_pdf_object() {
-        // Default orientation is Portrait
+        // Default orientation is Portrait.
         $orientation = 'P';
 
-        $this->pdf = new mypdf($orientation, 'mm', array($this->A4_width, $this->A4_height), true, 'UTF-8');
+        $this->pdf = new mypdf($orientation, 'mm', array($this->a4width, $this->a4height), true, 'UTF-8');
 
         $this->pdf->setPrintHeader(true);
         $this->pdf->setPrintFooter(false);
@@ -273,72 +351,82 @@ class export_innovation_pdf {
     protected function generate_cover_page() {
         global $DB;
 
-        // Cover page
+        // Cover page.
         $this->pdf->AddPage();
 
-        // Override - Cover background image
-        $bMargin = $this->pdf->getBreakMargin();
-        $auto_page_break = $this->pdf->getAutoPageBreak();
+        // Override - Cover background image.
+        $bmargin = $this->pdf->getBreakMargin();
+        $autopagebreak = $this->pdf->getAutoPageBreak();
         $this->pdf->SetAutoPageBreak(false, 0);
-        $this->pdf->Image($this->coverimagefile, 0, 0, $this->A4_width, $this->A4_height, '', '', '', false, 300, '', false, false, 0);
-        $this->pdf->SetAutoPageBreak($auto_page_break, $bMargin);
+        $this->pdf->Image($this->coverimagefile, 0, 0,
+                            $this->a4width,
+                            $this->a4height, '', '', '', false, 300, '', false, false, 0);
+        $this->pdf->SetAutoPageBreak($autopagebreak, $bmargin);
         $this->pdf->setPageMark();
 
-        // Report title
+        // Report title.
         $covertitle = 'Portfolio';
         $this->pdf->SetFontSize($this->covertitlesize);
-        $this->pdf->writeHTMLCell($this->bodywidth_portrait, 0, $this->leftmargin, 100, $covertitle, 0, 0, false, true, 'C');
+        $this->pdf->writeHTMLCell($this->bodywidthportrait, 0, $this->leftmargin, 100, $covertitle, 0, 0, false, true, 'C');
 
-        // Student name
-        $coverdescription = fullname($this->user_obj);
+        // Student name.
+        $coverdescription = fullname($this->userobj);
         $this->pdf->SetFontSize($this->coverdescriptionsize);
-        $this->pdf->writeHTMLCell($this->bodywidth_portrait, 0, $this->leftmargin, 130, $coverdescription, 0, 0, false, true, 'C');
+        $this->pdf->writeHTMLCell($this->bodywidthportrait, 0, $this->leftmargin, 130, $coverdescription, 0, 0, false, true, 'C');
 
-        // Student information
-        $email = empty($this->user_obj->email) ? '-' : $this->user_obj->email;
+        // Student information.
+        $email = empty($this->userobj->email) ? '-' : $this->userobj->email;
         $email = 'Email: ' . $email;
         $this->pdf->SetFontSize($this->defaultsize);
-        $this->pdf->writeHTMLCell($this->bodywidth_portrait, 0, $this->leftmargin, 145, $email, 0, 0, false, true, 'C');
+        $this->pdf->writeHTMLCell($this->bodywidthportrait, 0, $this->leftmargin, 145, $email, 0, 0, false, true, 'C');
 
-        $mobile = empty($this->user_obj->phone2) ? '-' : $this->user_obj->phone2;
+        $mobile = empty($this->userobj->phone2) ? '-' : $this->userobj->phone2;
         $mobile = 'Mobile: ' . $mobile;
         $this->pdf->SetFontSize($this->defaultsize);
-        $this->pdf->writeHTMLCell($this->bodywidth_portrait, 0, $this->leftmargin, 152, $mobile, 0, 0, false, true, 'C');                       
+        $this->pdf->writeHTMLCell($this->bodywidthportrait, 0, $this->leftmargin, 152, $mobile, 0, 0, false, true, 'C');
     }
 
     /**
      * Render data on content page.
+     *
+     * @param object $entry
      */
     protected function generate_content_page($entry) {
         global $DB;
 
-        $course_obj = $DB->get_record('course', array('id' => $entry->courseid));
+        $courseobj = $DB->get_record('course', array('id' => $entry->courseid));
 
-        if ($course_obj) {
+        if ($courseobj) {
             $this->pdf->startPageGroup();
             $this->pdf->AddPage();
 
-            // Course title
-            $coursetitle = $course_obj->fullname;
+            // Course title.
+            $coursetitle = $courseobj->fullname;
             $this->pdf->SetFontSize($this->pagetitlesize);
-            $this->pdf->writeHTMLCell($this->bodywidth_portrait, 0, $this->leftmargin, $this->topmargin, $coursetitle, 0, 1, false, true, 'C');
+            $this->pdf->writeHTMLCell($this->bodywidthportrait, 0,
+                                        $this->leftmargin,
+                                        $this->topmargin,
+                                        $coursetitle, 0, 1, false, true, 'C');
 
-            // Blog title
+            // Blog title.
             $blogsubject = $entry->subject;
             $this->pdf->SetFontSize($this->pagedescriptionsize);
-            $this->pdf->writeHTMLCell($this->bodywidth_portrait, 0, $this->leftmargin, $this->topmargin + $this->linesize, $blogsubject, 0, 1, false, true, 'C');
+            $this->pdf->writeHTMLCell($this->bodywidthportrait, 0,
+                                        $this->leftmargin,
+                                        $this->topmargin + $this->linesize,
+                                        $blogsubject, 0, 1, false, true, 'C');
 
-            // Blog content
+            // Blog content.
             $summary = file_rewrite_pluginfile_urls($entry->summary, 'pluginfile.php', SYSCONTEXTID, 'blog', 'post', $entry->id);
             $summary = $this->process_content_images($summary);
             $summary = $this->process_content_links($summary);
             $data = $summary;
 
-            // Blog tags
-            $tagArr = core_tag_tag::get_item_tags_array('core', 'post', $entry->id); 
-            if($tagArr) {
+            // Blog tags.
+            $tagarr = core_tag_tag::get_item_tags_array('core', 'post', $entry->id);
+            if ($tagarr) {
                 $tag = "";
-                foreach ($tagArr as $key => $value) {
+                foreach ($tagarr as $key => $value) {
                     $tag .= ", ".$value;
                 }
                 $tag = substr($tag, 1);
@@ -346,7 +434,11 @@ class export_innovation_pdf {
             $data .= "<b>Keywords / Skills : </b>".$tag."<br />";
 
             $this->pdf->SetFontSize($this->defaultsize);
-            $this->pdf->writeHTMLCell($this->bodywidth_portrait, $this->bodyheight_portrait, $this->leftmargin, $this->bodymargin, $data, 0, 1, false, true, 'L');
+            $this->pdf->writeHTMLCell($this->bodywidthportrait,
+                                        $this->bodyheightportrait,
+                                        $this->leftmargin,
+                                        $this->bodymargin,
+                                        $data, 0, 1, false, true, 'L');
         }
     }
 
@@ -360,17 +452,23 @@ class export_innovation_pdf {
 
         $tagreporttitle = get_string('managepageheading', 'local_innoedtools');
         $this->pdf->SetFontSize($this->pagetitlesize);
-        $this->pdf->writeHTMLCell($this->A4_width, 0, 0, $this->topmargin, $tagreporttitle, 0, 0, false, true, 'C');
+        $this->pdf->writeHTMLCell($this->a4width, 0, 0, $this->topmargin, $tagreporttitle, 0, 0, false, true, 'C');
 
-        $report_tag_by_overall = new report_tag_by_overall(false);
-        $table = $report_tag_by_overall->generate_report_pdf();
+        $reporttagbyoverall = new report_tag_by_overall(false);
+        $table = $reporttagbyoverall->generate_report_pdf();
 
         $this->pdf->SetFontSize($this->defaultsize);
-        $this->pdf->writeHTMLCell($this->bodywidth_portrait, $this->bodyheight_portrait, $this->leftmargin, $this->bodymargin, html_writer::table($table), 0, 0, false, true, 'C');
+        $this->pdf->writeHTMLCell($this->bodywidthportrait,
+                                    $this->bodyheightportrait,
+                                    $this->leftmargin,
+                                    $this->bodymargin,
+                                    html_writer::table($table), 0, 0, false, true, 'C');
     }
 
     /**
      * Process to convert image moodle path -> image server path. Then pdf can show images.
+     *
+     * @param string $content
      */
     private function process_content_images($content) {
         global $CFG;
@@ -396,7 +494,7 @@ class export_innovation_pdf {
                 }
             }
         }
-       
+
         // Replace content.
         if ($replacements) {
             $content = str_replace(array_keys($replacements), $replacements, $content);
@@ -407,6 +505,8 @@ class export_innovation_pdf {
 
     /**
      * Process to convert link (<a> tag) -> QR code.
+     *
+     * @param string $content
      */
     private function process_content_links($content) {
         global $CFG;
@@ -414,21 +514,21 @@ class export_innovation_pdf {
 
         $dom = new DomDocument();
         $dom->loadHTML($content);
-        $list_of_links = array();
-       
-        foreach ($dom->getElementsByTagName('a') as $item) {      
-            $list_of_links[] = array (
+        $listoflinks = array();
+
+        foreach ($dom->getElementsByTagName('a') as $item) {
+            $listoflinks[] = array (
                 'str' => $dom->saveHTML($item),
                 'href' => $item->getAttribute('href'),
                 'text' => $item->nodeValue
             );
         }
 
-        foreach($list_of_links as $value){
+        foreach ($listoflinks as $value) {
             $str = $value['str'];
             $href = $value['href'];
 
-            // Serialize QR Code
+            // Serialize QR Code.
             $qrcode = $this->generate_qrcode($href);
             $replacements[$str] = $qrcode;
         }
@@ -442,9 +542,11 @@ class export_innovation_pdf {
 
     /**
      * Serialize QR Code into HTML tag
+     *
+     * @param string $href
      */
     private function generate_qrcode($href) {
-        $params = $this->pdf->serializeTCPDFtagParameters(array($href, 'QRCODE,Q', '', '', 25, 25, $this->style_qrcode, 'N'));
+        $params = $this->pdf->serializeTCPDFtagParameters(array($href, 'QRCODE,Q', '', '', 25, 25, $this->styleqrcode, 'N'));
         $qrcode = '<br><tcpdf method="write2DBarcode" params="'.$params.'" />';
 
         return $qrcode;

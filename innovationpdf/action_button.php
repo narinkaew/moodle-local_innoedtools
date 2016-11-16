@@ -1,4 +1,6 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -20,18 +22,20 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 $actionchoices = array();
 $actionchoices['1'] = get_string('preview', 'local_innoedtools');
 $actionchoices['2'] = get_string('print', 'local_innoedtools');
 
 echo $OUTPUT->box_start('generalbox boxwidthwide boxaligncenter centerpara');
 echo '<form method="get" action="." id="exportpdfform">';
-echo '	<div>';
-echo 		$OUTPUT->heading(get_string('actiontext', 'local_innoedtools'));
-echo 		html_writer::select($actionchoices, 'act', $act);
-echo '		<input type="submit" id="exportpdfsubmit" value="' . get_string('submittext', 'local_innoedtools') . '" />';
-echo '		<p></p>';
-echo '	</div>';
-echo '	<input type="hidden" name="uid" value="'.$this->current_user.'"/>';
+echo '  <div>';
+echo        $OUTPUT->heading(get_string('actiontext', 'local_innoedtools'));
+echo        html_writer::select($actionchoices, 'act', $act);
+echo '      <input type="submit" id="exportpdfsubmit" value="' . get_string('submittext', 'local_innoedtools') . '" />';
+echo '      <p></p>';
+echo '  </div>';
+echo '  <input type="hidden" name="uid" value="'.$this->currentuser.'"/>';
 echo '</form>';
 echo $OUTPUT->box_end();
