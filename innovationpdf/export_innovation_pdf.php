@@ -482,7 +482,7 @@ class export_innovation_pdf {
             $replacements = array();
             $fs = get_file_storage();
             foreach ($matches[1] as $imagepath) {
-                if (!$file = $fs->get_file_by_hash(sha1($imagepath)) or $file->is_directory()) {
+                if (!$file = $fs->get_file_by_hash(sha1(urldecode($imagepath))) or $file->is_directory()) {
                     continue;
                 }
 
