@@ -268,6 +268,8 @@ class export_innovation_pdf {
         $rowsblogs = $this->get_innovation_blog();
 
         $systemcontext = context_system::instance();
+        $PAGE->set_context($systemcontext);
+
         // Check if user try to view blog of someone else.
         if (!(is_siteadmin() || has_capability('local/innoedtools:viewallinnovationpdf', $systemcontext))) {
             if ($this->currentuser != $USER->id) {

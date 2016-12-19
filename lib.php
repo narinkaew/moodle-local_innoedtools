@@ -40,7 +40,7 @@ function local_innoedtools_extend_navigation(global_navigation $navigation) {
 
         if (has_capability('local/innoedtools:canviewtagreport', $PAGE->context)) {
 
-            $nodeplugin = $navigation->find($navigationlabelplugin);
+            $nodeplugin = $navigation->find($navigationlabelplugin, null);
 
             // Create a child node.
             $navigationlabelattributes = get_string('navigation_label_attributes', 'local_innoedtools');
@@ -51,7 +51,7 @@ function local_innoedtools_extend_navigation(global_navigation $navigation) {
 
         if (has_capability('local/innoedtools:canviewinnovationpdf', $PAGE->context)) {
 
-            $nodeplugin = $navigation->find($navigationlabelplugin);
+            $nodeplugin = $navigation->find($navigationlabelplugin, null);
 
             // Create a child node.
             $navigationlabelinnovationpdf = get_string('navigation_label_innovationpdf', 'local_innoedtools');

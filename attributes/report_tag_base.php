@@ -174,6 +174,8 @@ class report_tag_base {
      */
     protected function generate_query_enrolled_student($isviewall = true) {
         global $DB, $USER, $OUTPUT;
+        // Criteria query for filter user.
+        $filtercurrentuser = null;
 
         $contextcourseid = $this->contextcourseid;
 

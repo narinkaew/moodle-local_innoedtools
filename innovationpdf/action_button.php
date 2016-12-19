@@ -24,6 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// Get URL parameters.
+$act = optional_param('act', '', PARAM_SAFEDIR);
+
 $actionchoices = array();
 $actionchoices['1'] = get_string('preview', 'local_innoedtools');
 $actionchoices['2'] = get_string('print', 'local_innoedtools');

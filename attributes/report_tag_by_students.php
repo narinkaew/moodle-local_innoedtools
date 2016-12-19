@@ -220,6 +220,9 @@ class report_tag_by_students extends report_tag_base {
         foreach ($table as $key => $value) {
            foreach ($value as $key2 => $value2) {
                 if ($key2 != 0 && $key2 != count($value) - 1) {
+                    if (!isset($data[$key2])) {
+                        $data[$key2] = 0;
+                    }
                     $data[$key2] = $data[$key2] + $value2;
                 }
             }
