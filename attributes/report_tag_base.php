@@ -24,6 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_login();
+if (isguestuser()) {
+    throw new require_login_exception('Guests are not allowed here.');
+}
+
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 
 /**
@@ -35,55 +40,55 @@ require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 class report_tag_base {
 
     /**
-     * Number of course.
+     * @var int Number of course.
      * @protected
      */
     protected $numcourses = 0;
 
     /**
-     * Number of standard tag.
+     * @var int Number of standard tag.
      * @protected
      */
     protected $numstandardtag = 0;
 
     /**
-     * Number of student.
+     * @var int Number of student.
      * @protected
      */
     protected $numstudent = 0;
 
     /**
-     * Array of course.
+     * @var array Array of course.
      * @protected
      */
     protected $arrcourses = array();
 
     /**
-     * Array of course context.
+     * @var array Array of course context.
      * @protected
      */
     protected $arrcoursescontext = array();
 
     /**
-     * Array of student.
+     * @var array Array of student.
      * @protected
      */
     protected $arrstudents = array();
 
     /**
-     * Array of blog.
+     * @var array Array of blog.
      * @protected
      */
     protected $arrblogs = array();
 
     /**
-     * Get a course context.
+     * @var int Get a course context.
      * @protected
      */
     protected $contextcourseid = 0;
 
     /**
-     * Aggregate icon in html.
+     * @var string Aggregate icon in html.
      * @protected
      */
     protected $aggregateicon = null;
@@ -107,16 +112,7 @@ class report_tag_base {
     protected function initial_course() {
         global $DB;
 
-        $sqlcourselist = "SELECT id,
-                                 sortorder,
-                                 fullname,
-                                 shortname,
-                                 idnumber
-                            FROM {course}
-                            WHERE idnumber <> ''
-                            AND visible = 1
-                            ORDER BY sortorder
-                        ";
+        $sqlcourselist = "SELECT id,sortorder, fullname, shortname, idnumber FROM {course} WHERE idnumber <> '' AND visible = 1 ORDER BY sortorder";
         $rowscourses = $DB->get_records_sql($sqlcourselist);
         $this->numcourses = count($rowscourses);
 
@@ -132,10 +128,7 @@ class report_tag_base {
     protected function initial_standard_tag() {
         global $DB;
 
-        $sqlstandardtags = "SELECT COUNT(id)
-                            FROM {tag}
-                            WHERE isstandard = 1
-                            ";
+        $sqlstandardtags = "SELECT COUNT(id) FROM {tag} WHERE isstandard = 1";
         $this->numstandardtag = $DB->count_records_sql($sqlstandardtags);
     }
 
@@ -185,17 +178,7 @@ class report_tag_base {
             $filtercurrentuser = ' AND u.id = ' . $currentuser;
         }
 
-        $sqlstudentslist = "SELECT u.id userid,
-                                   CONCAT(u.firstname, ' ', u.lastname) fullname
-                            FROM {role_assignments} ra
-                            INNER JOIN {role} r ON r.id = ra.roleid
-                            INNER JOIN {user} u ON u.id = ra.userid
-                            WHERE ra.contextid = $contextcourseid
-                                AND archetype = 'student'
-                                AND u.deleted = 0
-                                $filtercurrentuser
-                            ORDER BY u.firstname, u.lastname, u.email
-                            ";
+        $sqlstudentslist = "SELECT u.id userid, CONCAT(u.firstname, ' ', u.lastname) fullname FROM {role_assignments} ra INNER JOIN {role} r ON r.id = ra.roleid INNER JOIN {user} u ON u.id = ra.userid WHERE ra.contextid = $contextcourseid AND archetype = 'student' AND u.deleted = 0 $filtercurrentuser ORDER BY u.firstname, u.lastname, u.email";
 
         return $sqlstudentslist;
     }

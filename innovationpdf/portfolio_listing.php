@@ -26,6 +26,11 @@ if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
 }
 
+require_login();
+if (isguestuser()) {
+    throw new require_login_exception('Guests are not allowed here.');
+}
+
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once($CFG->dirroot .'/blog/lib.php');
 require_once($CFG->dirroot .'/blog/locallib.php');
@@ -41,14 +46,12 @@ require_once($CFG->dirroot .'/comment/lib.php');
 class portfolio_listing extends blog_listing {
 
     /**
-     * Current user.
-     * @protected
+     * @var int Current user.
      */
     protected $currentuser = 0;
 
     /**
-     * Number of current user blogs.
-     * @protected
+     * @var int Number of current user blogs.
      */
     protected $numblogs = 0;
 
@@ -119,8 +122,7 @@ class portfolio_listing extends blog_listing {
                             AND c.idnumber <> ''
                             AND c.visible = 1
                             AND p.userid = $this->currentuser
-                            ORDER BY userid ASC, courseid ASC
-                        ";
+                            ORDER BY userid ASC, courseid ASC";
         $rowsblogs = $DB->get_records_sql($sqlbloglist);
 
         $this->numblogs = count($rowsblogs);

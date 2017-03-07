@@ -24,6 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_login();
+if (isguestuser()) {
+    throw new require_login_exception('Guests are not allowed here.');
+}
+
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once($CFG->dirroot.'/blog/locallib.php');
 require_once('mypdf.php');
@@ -38,129 +43,105 @@ require_once($CFG->dirroot.'/local/innoedtools/attributes/report_tag_by_overall.
 class export_innovation_pdf {
 
     /**
-     * Pdf object.
-     * @protected
+     * @var string Pdf object.
      */
     protected $pdf = null;
     /**
-     * Preview mode.
-     * @protected
+     * @var int Preview mode.
      */
     protected $ispreview = 0;
 
     /**
-     * Current user id.
-     * @protected
+     * @var int Current user id.
      */
     protected $currentuser = 0;
     /**
-     * Object of Current user.
-     * @protected
+     * @var int Object of Current user.
      */
     protected $userobj;
 
     /**
-     * Left margin.
-     * @protected
+     * @var int Left margin.
      */
     protected $leftmargin = 0;
     /**
-     * Top margin.
-     * @protected
+     * @var int Top margin.
      */
     protected $topmargin = 0;
     /**
-     * Right margin.
-     * @protected
+     * @var int Right margin.
      */
     protected $rightmargin = 0;
     /**
-     * Bottom margin.
-     * @protected
+     * @var int Bottom margin.
      */
     protected $bottommargin = 0;
     /**
-     * Line height.
-     * @protected
+     * @var int Line height.
      */
     protected $linesize = 0;
     /**
-     * Top margin to first line of body.
-     * @protected
+     * @var int Top margin to first line of body.
      */
     protected $bodymargin = 0;
 
     /**
-     * Paper A4 width.
-     * @protected
+     * @var int Paper A4 width.
      */
     protected $a4width = 0;
     /**
-     * Paper A4 height.
-     * @protected
+     * @var int Paper A4 height.
      */
     protected $a4height = 0;
     /**
-     * Body width in protrait.
-     * @protected
+     * @var int Body width in protrait.
      */
     protected $bodywidthportrait = 0;
     /**
-     * Body width in landscape.
-     * @protected
+     * @var int Body width in landscape.
      */
     protected $bodywidthlandscape = 0;
     /**
-     * Body height in protrait.
-     * @protected
+     * @var int Body height in protrait.
      */
     protected $bodyheightportrait = 0;
     /**
-     * Body height in landscape.
-     * @protected
+     * @var int Body height in landscape.
      */
     protected $bodyheightlandscape = 0;
 
     /**
-     * Cover page title font size. 
-     * @protected
+     * @var int Cover page title font size. 
      */
     protected $covertitlesize = 0;
     /**
-     * Cover page description font size.
-     * @protected
+     * @var int Cover page description font size.
      */
     protected $coverdescriptionsize = 0;
     /**
-     * Page title font size.
-     * @protected
+     * @var int Page title font size.
      */
     protected $pagetitlesize = 0;
     /**
-     * Page description font size.
-     * @protected
+     * @var int Page description font size.
      */
     protected $pagedescriptionsize = 0;
     /**
-     * Default font size.
-     * @protected
+     * @var int Default font size.
      */
     protected $defaultsize = 0;
 
     /**
-     * Cover background image file.
-     * @protected
+     * @var string Cover background image file.
      */
     protected $coverimagefile = '';
     /**
-     * Page background image file.
-     * @protected
+     * @var string Page background image file.
      */
     protected $backgroundimagefile = '';
 
     /**
-     * QR code settings.
-     * @protected
+     * @var array QR code settings.
      */
     protected $styleqrcode = array();
 

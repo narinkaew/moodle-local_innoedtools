@@ -24,6 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_login();
+if (isguestuser()) {
+    throw new require_login_exception('Guests are not allowed here.');
+}
+
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once('report_tag_base.php');
 
@@ -74,7 +79,7 @@ class report_tag_by_tags extends report_tag_base {
      */
     public function generate_query() {
 
-        $sql_students_list = $this->generate_query_enrolled_student(true);
+        $sqlstudentslist = $this->generate_query_enrolled_student(true);
 
         // Get using tags for all courses.
         $i = 0;
@@ -100,11 +105,10 @@ class report_tag_by_tags extends report_tag_base {
                                     ) a
                                     INNER JOIN
                                     (
-                                        $sql_students_list
+                                        $sqlstudentslist
                                     ) b
                                     ON a.userid = b.userid
-                                    GROUP BY a.rawname, a.id
-                                    ";
+                                    GROUP BY a.rawname, a.id";
 
             $sqlinnercoursecount .= "CASE WHEN User_Items.id = $courseid THEN cnt END AS $courseidnumber";
             $sqlinnercoursecountsum .= "COALESCE(SUM($courseidnumber), 0) AS $courseidnumber";
@@ -133,8 +137,7 @@ class report_tag_by_tags extends report_tag_base {
                         WHERE t.isstandard = 1
                     ) User_Items
                 ) User_Items_Extended
-                GROUP BY rawname
-                ";
+                GROUP BY rawname";
 
         return $sql;
     }

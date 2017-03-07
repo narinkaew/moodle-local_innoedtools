@@ -35,8 +35,8 @@ require_once('report_tag_base.php');
  */
 class report_tag_by_overall extends report_tag_base {
 
-    /** 
-     * Print on pdf
+    /**
+     * @var bool Print on pdf
      * @protected
      */
     protected $ispdf = false;
@@ -144,8 +144,7 @@ class report_tag_by_overall extends report_tag_base {
                                         AND ti.component = 'core'
                                         AND p.courseid = $courseid
                                         AND p.userid = $userid
-                                        GROUP BY t.rawname, c.id
-                                    ";
+                                        GROUP BY t.rawname, c.id";
 
             $sqlinnercoursecount .= "CASE WHEN User_Items.id = $courseid THEN cnt END AS $courseidnumber";
             $sqlinnercoursecountsum .= "COALESCE(SUM($courseidnumber), 0) AS $courseidnumber";
@@ -160,7 +159,7 @@ class report_tag_by_overall extends report_tag_base {
 
         $sql = "SELECT rawname,
                        $sqlinnercoursecountsum
-                    FROM
+                   FROM
                     (
                         SELECT User_Items.rawname,
                                $sqlinnercoursecount
@@ -178,8 +177,7 @@ class report_tag_by_overall extends report_tag_base {
                                     WHERE t.isstandard = 1
                             ) User_Items
                     ) User_Items_Extended
-                GROUP BY rawname
-                ";
+                GROUP BY rawname";
 
         return $sql;
     }

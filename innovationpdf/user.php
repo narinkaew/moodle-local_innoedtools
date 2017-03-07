@@ -69,7 +69,10 @@ foreach ($arrstudents as $id => $value) {
                                     'index.php',
                                     array('uid' => $userobj->id)
                                 ),
-                                html_writer::empty_tag('img', array('src' => $OUTPUT->pix_url('t/viewdetails'), 'alt' => 'View', 'class' => 'iconsmall')),
+                                html_writer::empty_tag(
+                                    'img',
+                                    array('src' => $OUTPUT->pix_url('t/viewdetails'), 'alt' => 'View', 'class' => 'iconsmall')
+                                ),
                                 array('title' => 'View', 'target' => '_blank')
                             );
 

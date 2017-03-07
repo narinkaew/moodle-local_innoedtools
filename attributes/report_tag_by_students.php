@@ -24,6 +24,11 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_login();
+if (isguestuser()) {
+    throw new require_login_exception('Guests are not allowed here.');
+}
+
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once('report_tag_base.php');
 
@@ -94,8 +99,7 @@ class report_tag_by_students extends report_tag_base {
                                     AND ti.component = 'core'
                                     AND p.courseid = $courseid
                                     AND t.isstandard = 1
-                                    GROUP BY p.userid, c.id
-                                    ";
+                                    GROUP BY p.userid, c.id";
 
             $sqlinnercoursecount .= "CASE WHEN User_Items.courseid = $courseid THEN cnt END AS $courseidnumber";
             $sqlinnercoursecountsum .= "COALESCE(SUM($courseidnumber), 0) AS $courseidnumber";
@@ -133,8 +137,7 @@ class report_tag_by_students extends report_tag_base {
                     ) User_Items
                 ) User_Items_Extended
                 GROUP BY userid
-                ORDER BY firstname, lastname
-                ";
+                ORDER BY firstname, lastname";
 
         return $sql;
     }
