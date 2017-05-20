@@ -36,6 +36,8 @@ if (isguestuser()) {
     throw new require_login_exception('Guests are not allowed here.');
 }
 
+$PAGE->set_url('/local/innoedtools/innovationpdf/index.php');
+
 // Get URL parameters.
 $uid = optional_param('uid', null, PARAM_INT);
 $act = optional_param('act', '', PARAM_SAFEDIR);

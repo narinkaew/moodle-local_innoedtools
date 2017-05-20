@@ -59,7 +59,10 @@ class report_tag_by_students extends report_tag_base {
 
         // Prepare sql statement.
         $sql = $this->generate_query();
-        $rows = $DB->get_records_sql($sql);
+
+        // Enable debug query, $DB->set_debug(true);
+        $rows = $DB->get_records_sql($sql, $this->arrcoursesparam);
+        // Enable debug query, $DB->set_debug(false);
 
         // All tags each student.
         foreach ($rows as $row) {
@@ -83,8 +86,13 @@ class report_tag_by_students extends report_tag_base {
         $sqlinnertagincourse = "";
         $sqlinnercoursecount = "";
         $sqlinnercoursecountsum = "";
+        $alias = "col";
         foreach ($this->arrcourses as $courseid => $courseidnumber) {
             $i++;
+            $this->arrcoursesparam[] = $courseidnumber;
+            // array_splice($this->arrcoursesparam, ($i*2)-2, 0, $courseidnumber);
+            // array_splice($this->arrcoursesparam, ($i*2)-1, 0, $courseidnumber);
+            // array_splice($this->arrcoursesparam, ($this->numcourses*2) + ($i-1), 0, $courseidnumber);
 
             $sqlinnertagincourse .= "SELECT p.userid,
                                             c.id,
@@ -101,8 +109,8 @@ class report_tag_by_students extends report_tag_base {
                                     AND t.isstandard = 1
                                     GROUP BY p.userid, c.id";
 
-            $sqlinnercoursecount .= "CASE WHEN User_Items.courseid = $courseid THEN cnt END AS $courseidnumber";
-            $sqlinnercoursecountsum .= "COALESCE(SUM($courseidnumber), 0) AS $courseidnumber";
+            $sqlinnercoursecount .= "CASE WHEN User_Items.courseid = $courseid THEN cnt END AS $alias$i";
+            $sqlinnercoursecountsum .= "COALESCE(SUM($alias$i), 0) AS ?";
 
             // Not last record.
             if ($i != $this->numcourses) {
@@ -112,7 +120,7 @@ class report_tag_by_students extends report_tag_base {
             }
         }
 
-        $sql = "SELECT fullname, $sqlinnercoursecountsum
+        $sql = "SELECT userid, firstname, lastname, fullname, $sqlinnercoursecountsum
                 FROM
                 (
                     SELECT User_Items.userid, User_Items.firstname, User_Items.lastname, User_Items.fullname, $sqlinnercoursecount
@@ -136,7 +144,7 @@ class report_tag_by_students extends report_tag_base {
                         ON u.userid = b.userid
                     ) User_Items
                 ) User_Items_Extended
-                GROUP BY userid
+                GROUP BY userid, fullname
                 ORDER BY firstname, lastname";
 
         return $sql;

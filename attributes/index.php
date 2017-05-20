@@ -36,6 +36,7 @@ if (isguestuser()) {
 }
 
 $systemcontext = context_system::instance();
+$PAGE->set_url('/local/innoedtools/attributes/index.php');
 $PAGE->set_context($systemcontext);
 $PAGE->set_pagelayout('report');
 

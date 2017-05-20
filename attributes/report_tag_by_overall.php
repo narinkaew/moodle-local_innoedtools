@@ -84,7 +84,7 @@ class report_tag_by_overall extends report_tag_base {
 
             // Prepare sql statement.
             $sql = $this->generate_query($userid);
-            $rows = $DB->get_records_sql($sql);
+            $rows = $DB->get_records_sql($sql, $this->arrcoursesparam);
 
             // All tags each student.
             if ($this->ispdf) {
@@ -128,8 +128,10 @@ class report_tag_by_overall extends report_tag_base {
         $sqlinnertagincourse = "";
         $sqlinnercoursecount = "";
         $sqlinnercoursecountsum = "";
+        $alias = "col";
         foreach ($this->arrcourses as $courseid => $courseidnumber) {
             $i++;
+            $this->arrcoursesparam[] = $courseidnumber;
 
             $sqlinnertagincourse .= "SELECT t.rawname,
                                             c.id,
@@ -146,8 +148,8 @@ class report_tag_by_overall extends report_tag_base {
                                         AND p.userid = $userid
                                         GROUP BY t.rawname, c.id";
 
-            $sqlinnercoursecount .= "CASE WHEN User_Items.id = $courseid THEN cnt END AS $courseidnumber";
-            $sqlinnercoursecountsum .= "COALESCE(SUM($courseidnumber), 0) AS $courseidnumber";
+            $sqlinnercoursecount .= "CASE WHEN User_Items.id = $courseid THEN cnt END AS $alias$i";
+            $sqlinnercoursecountsum .= "COALESCE(SUM($alias$i), 0) AS ?";
 
             // Not last record.
             if ($i != $this->numcourses) {

@@ -64,6 +64,12 @@ class report_tag_base {
     protected $arrcourses = array();
 
     /**
+     * @var array Array of course parameter.
+     * @protected
+     */
+    protected $arrcoursesparam = array();
+
+    /**
      * @var array Array of course context.
      * @protected
      */

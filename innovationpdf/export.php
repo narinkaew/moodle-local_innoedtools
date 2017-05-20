@@ -25,10 +25,14 @@
 require_once(dirname(dirname(dirname(dirname(__FILE__)))).'/config.php');
 require_once('export_innovation_pdf.php');
 
+global $PAGE;
+
 require_login();
 if (isguestuser()) {
     throw new require_login_exception('Guests are not allowed here.');
 }
+
+$PAGE->set_url('/local/innoedtools/innovationpdf/export.php');
 
 $uid = optional_param('uid', null, PARAM_INT);
 $preview = optional_param('preview', null, PARAM_INT);

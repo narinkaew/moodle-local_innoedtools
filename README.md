@@ -5,7 +5,7 @@ Adds new items to the navigation block under 'Site pages > Inno Ed Tools' with 2
 
 Inno Smart Report - allowing you to display the specific report on 3 different types. The tag data is processed from student blog entry that associated to course.
 
-Inno Smart Portfolio - allowing you to display user blog entry that associated to course. it allows user to export file in PDF format. After printing the url link will generated to the QR code. its allow anyone to use a smart phone or other device to scan the QR cde and gain direct access to a specified link.
+Inno Smart Portfolio - allowing you to display user blog entry that associated to course. it allows user to export file in PDF format. After printing the url link will generated to the QR code. its allow anyone to use a smart phone or other device to scan the QR code and gain direct access to a specified link.
 
 # Installation
 

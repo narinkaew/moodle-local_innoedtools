@@ -61,3 +61,12 @@ function local_innoedtools_extend_navigation(global_navigation $navigation) {
         }
     }
 }
+
+/**
+ * Extends the navigation block and adds a new node 'Inno Ed Tools'. This is visible if the current user has the capability.
+ * @param settings_navigation $nav
+ * @param context $context
+ */
+function local_innoedtools_extend_settings_navigation(settings_navigation $nav, context $context) {
+ 
+}

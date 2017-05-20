@@ -33,6 +33,7 @@ if (isguestuser()) {
 }
 
 $sitecontext = context_system::instance();
+$PAGE->set_url('/local/innoedtools/innovationpdf/user.php');
 $PAGE->set_context($sitecontext);
 $PAGE->set_pagelayout('standard');
 
