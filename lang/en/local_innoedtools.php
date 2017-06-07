@@ -66,6 +66,7 @@ $string['print'] = 'Print';
 
 $string['actiontext'] = 'Export settings';
 $string['submittext'] = 'Submit';
+$string['keywordtext'] = 'Keywords / Skills';
 
 $string['noentriesyet'] = 'No visible entries here';
 $string['nopermission'] = 'No permission to see this!';

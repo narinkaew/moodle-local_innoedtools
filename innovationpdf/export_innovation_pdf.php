@@ -414,7 +414,9 @@ class export_innovation_pdf {
                 }
                 $tag = substr($tag, 1);
             }
-            $data .= "<b>Keywords / Skills : </b>".$tag."<br />";
+
+            $keywordtext = get_string('keywordtext', 'local_innoedtools');
+            $data .= "<b>".$keywordtext." : </b>".$tag."<br />";
 
             $this->pdf->SetFontSize($this->defaultsize);
             $this->pdf->writeHTMLCell($this->bodywidthportrait,
