@@ -59,7 +59,7 @@ class report_tag_by_tags extends report_tag_base {
 
         // Prepare sql statement.
         $sql = $this->generate_query();
-        $rows = $DB->get_records_sql($sql, $this->arrcoursesparam);
+        $rows = $DB->get_records_sql($sql);
 
         // All tags each student.
         foreach ($rows as $row) {
@@ -89,7 +89,7 @@ class report_tag_by_tags extends report_tag_base {
         $alias = "col";
         foreach ($this->arrcourses as $courseid => $courseidnumber) {
             $i++;
-            $this->arrcoursesparam[] = $courseidnumber;
+            //$this->arrcoursesparam[] = $courseidnumber;
 
             $sqlinnertagincourse .= "SELECT a.rawname, a.id, COUNT(a.rawname) cnt
                                     FROM 
@@ -113,7 +113,7 @@ class report_tag_by_tags extends report_tag_base {
                                     GROUP BY a.rawname, a.id";
 
             $sqlinnercoursecount .= "CASE WHEN User_Items.id = $courseid THEN cnt END AS $alias$i";
-            $sqlinnercoursecountsum .= "COALESCE(SUM($alias$i), 0) AS ?";
+            $sqlinnercoursecountsum .= "COALESCE(SUM($alias$i), 0) AS \"$courseidnumber\"";
 
             // Not last record.
             if ($i != $this->numcourses) {
@@ -204,7 +204,7 @@ class report_tag_by_tags extends report_tag_base {
 
         array_push($data, $row->rawname);
         foreach ($this->arrcourses as $courseid => $courseidnumber) {
-            $c = strtolower($courseidnumber);
+            $c = $this->get_strtolower_from_dbtype($courseidnumber);
             array_push($data, $row->$c.' ('.$this->convert_to_percent($row->$c, $this->get_col_possibility()).')');
             $totalrow += $row->$c;
         }

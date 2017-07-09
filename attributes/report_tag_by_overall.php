@@ -84,7 +84,7 @@ class report_tag_by_overall extends report_tag_base {
 
             // Prepare sql statement.
             $sql = $this->generate_query($userid);
-            $rows = $DB->get_records_sql($sql, $this->arrcoursesparam);
+            $rows = $DB->get_records_sql($sql);
 
             // All tags each student.
             if ($this->ispdf) {
@@ -131,7 +131,7 @@ class report_tag_by_overall extends report_tag_base {
         $alias = "col";
         foreach ($this->arrcourses as $courseid => $courseidnumber) {
             $i++;
-            $this->arrcoursesparam[] = $courseidnumber;
+            //$this->arrcoursesparam[] = $courseidnumber;
 
             $sqlinnertagincourse .= "SELECT t.rawname,
                                             c.id,
@@ -149,7 +149,7 @@ class report_tag_by_overall extends report_tag_base {
                                         GROUP BY t.rawname, c.id";
 
             $sqlinnercoursecount .= "CASE WHEN User_Items.id = $courseid THEN cnt END AS $alias$i";
-            $sqlinnercoursecountsum .= "COALESCE(SUM($alias$i), 0) AS ?";
+            $sqlinnercoursecountsum .= "COALESCE(SUM($alias$i), 0) AS \"$courseidnumber\"";
 
             // Not last record.
             if ($i != $this->numcourses) {
@@ -242,7 +242,7 @@ class report_tag_by_overall extends report_tag_base {
         array_push($data, $row->rawname);
 
         foreach ($this->arrcourses as $courseid => $courseidnumber) {
-            $c = strtolower($courseidnumber);
+            $c = $this->get_strtolower_from_dbtype($courseidnumber);
             array_push($data, $row->$c);
             $countthistag += $row->$c;
         }

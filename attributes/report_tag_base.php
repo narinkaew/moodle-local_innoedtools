@@ -264,4 +264,19 @@ class report_tag_base {
     protected function convert_to_percent($x, $y) {
         return round(($x / $y) * 100, 2) . '%';
     }
+
+    /**
+     * Compare string with case sensitive depends on database type
+     *
+     * @param string $text
+     */
+    protected function get_strtolower_from_dbtype($text) {
+        global $CFG;
+
+        if ($CFG->dbtype == 'pgsql') {
+            return $text;
+        } else {
+            return strtolower($text);
+        }
+    }
 }

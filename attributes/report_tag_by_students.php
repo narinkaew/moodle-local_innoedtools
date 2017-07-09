@@ -61,7 +61,7 @@ class report_tag_by_students extends report_tag_base {
         $sql = $this->generate_query();
 
         // Enable debug query, $DB->set_debug(true);
-        $rows = $DB->get_records_sql($sql, $this->arrcoursesparam);
+        $rows = $DB->get_records_sql($sql);
         // Enable debug query, $DB->set_debug(false);
 
         // All tags each student.
@@ -89,7 +89,7 @@ class report_tag_by_students extends report_tag_base {
         $alias = "col";
         foreach ($this->arrcourses as $courseid => $courseidnumber) {
             $i++;
-            $this->arrcoursesparam[] = $courseidnumber;
+            //$this->arrcoursesparam[] = $courseidnumber;
             // array_splice($this->arrcoursesparam, ($i*2)-2, 0, $courseidnumber);
             // array_splice($this->arrcoursesparam, ($i*2)-1, 0, $courseidnumber);
             // array_splice($this->arrcoursesparam, ($this->numcourses*2) + ($i-1), 0, $courseidnumber);
@@ -110,7 +110,7 @@ class report_tag_by_students extends report_tag_base {
                                     GROUP BY p.userid, c.id";
 
             $sqlinnercoursecount .= "CASE WHEN User_Items.courseid = $courseid THEN cnt END AS $alias$i";
-            $sqlinnercoursecountsum .= "COALESCE(SUM($alias$i), 0) AS ?";
+            $sqlinnercoursecountsum .= "COALESCE(SUM($alias$i), 0) AS \"$courseidnumber\"";
 
             // Not last record.
             if ($i != $this->numcourses) {
@@ -144,7 +144,7 @@ class report_tag_by_students extends report_tag_base {
                         ON u.userid = b.userid
                     ) User_Items
                 ) User_Items_Extended
-                GROUP BY userid, fullname
+                GROUP BY userid, firstname, lastname, fullname
                 ORDER BY firstname, lastname";
 
         return $sql;
@@ -208,7 +208,7 @@ class report_tag_by_students extends report_tag_base {
 
         array_push($data, $row->fullname);
         foreach ($this->arrcourses as $courseid => $courseidnumber) {
-            $c = strtolower($courseidnumber);
+            $c = $this->get_strtolower_from_dbtype($courseidnumber);
             array_push($data, $row->$c);
             $totalrow += $row->$c;
         }
